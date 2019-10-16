@@ -8,6 +8,7 @@
             "email": "dkangel666@hotmail.com"
         }
     ],
+    "license": "MIT",
     "require": {
         "php": "^7.1",
         "twig/twig": "^2.6",
