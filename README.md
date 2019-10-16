@@ -5,15 +5,15 @@ another simple PHP framework.
 * routing - Slim
 * templating - Twig
 * i18n (internationalization) - custom
-* mySql - simple ORM
 * Simple User Management - custom
 * CSRF Token - twig
-* tables integration - DataTables.net
+* mySql - simple ORM (maybe remove?)
+* server-side tables integration - DataTables.net (remove?)
 
 ## Installing
 
 ````
-composer install angedelamort/php-sun-framework
+composer require "angedelamort/php-sun-framework"
 ````
 
 ## Using
@@ -96,7 +96,7 @@ public $config = [
         'routes.custom' => null,        // callback: If you just want to make a simple function for registering your routes.
         'view.templates' => '.',        // string|array<string>: directory where the twig templates are located.
         'view.cache' => false,          // bool: set to true to enable the cache
-        'view.csrf' => false,           // enable CSRF token. TODO: add doc for token in the form. See Also whitelisting.
+        'view.csrf' => false,           // enable CSRF token.
         'view.addExtension' => null,    // callback($twig): If you want to register new extension
         'session.cookie_lifetime' => 1209600,   // int: 14 days is the default.
         'i18n.directory' => null,       // string: locale directory. If null, no locale will be set.
@@ -112,8 +112,6 @@ In the templating part, I've added an easy way to include files in a page. The r
 2. It's always complicated to have the same version on all templates.
 3. Switching between the minified version and the standard one can be annoying.
 
-TODO: Make sure you can minify the versions of the file if necessary.
-
 ## Running the sample
 Using docker-compose
 ````
@@ -127,3 +125,11 @@ Even if it's a simple framework, you can easily activate each features individua
 The reason is that sometime you don't need a mySql database for a simple web site. Or if
 you don't like twig as a template engine, you can always use another one.
 
+## TODO
+* remove recaptcha manager.
+* remove useless twig extensions.
+* add doc for CSRF token in the form. See Also whitelisting.
+* refactor twig extension if needed.
+* try to document all cases (twig, i18n, etc).
+* try to put back the SSP - really useful with datatables.net
+* make sure you can minify the versions of the local files if necessary.

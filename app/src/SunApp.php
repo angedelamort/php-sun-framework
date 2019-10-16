@@ -127,13 +127,13 @@ class SunApp extends \Slim\App {
                 if (count(array_filter($this->whitelistableRoutes, function($whiteListEntry) use ($pattern) {
                         return StringUtil::startsWith($pattern, $whiteListEntry);
                     })) > 0) {
-                    error_log("Whitelisted route\n");
                     return $next($request, $response);
                 }
 
                 // if a bad post, just try to reload the page.
                 if ($request->getMethod() == 'POST') {
-                    error_log("it's a post, try to go to the GET wityh same address\n");
+                    // TODO: add this mechanism in the config.
+                    error_log("it's a post, try to go to the GET with same address\n");
                     return $response->withStatus(302)->withHeader('Location', $request->getUri());
                 }
 
