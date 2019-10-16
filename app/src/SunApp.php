@@ -19,7 +19,7 @@ use sunframework\twigExtensions\ScriptExtension;
 use sunframework\twigExtensions\SwitchTwigExtension;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use SimpleORM\Model;
+//use SimpleORM\Model;
 
 class SunApp {
     private $app;
@@ -74,9 +74,9 @@ class SunApp {
     }
 
     private function initDatabase() {
-        $config = $this->config['db'];
+        /*$config = $this->config['db'];
         Model::config($config);
-        SSP::config($config);
+        SSP::config($config);*/
     }
 
     private function initSession() {
