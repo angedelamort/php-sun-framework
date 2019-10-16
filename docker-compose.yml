@@ -1,0 +1,48 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+version: "3.1"
+services:
+
+#    mysql:
+#      image: mysql:5.7
+#      container_name: sun-mysql
+#      working_dir: /application
+#      volumes:
+#        - .:/application
+#      environment:
+#        - MYSQL_ROOT_PASSWORD=root
+#        - MYSQL_DATABASE=sun
+#        - MYSQL_USER=admin
+#        - MYSQL_PASSWORD=admin
+#      ports:
+#        - "8890:3306"
+
+    webserver:
+      image: nginx:alpine
+      container_name: sun-webserver
+      working_dir: /application
+      volumes:
+          - .:/application
+          - ./sample/phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      ports:
+       - "9999:80"
+
+    php-fpm:
+      build: sample/phpdocker/php-fpm
+      container_name: sun-php-fpm
+      working_dir: /application
+      volumes:
+        - .:/application
+        - ./sample/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.3/fpm/conf.d/99-overrides.ini
+        - ./sample/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.3/cli/conf.d/99-overrides.ini
+
+    composer:
+      image: prooph/composer:7.2
+      container_name: sun-composer
+      working_dir: /composer
+      restart: 'no'
+      #command: install
+      volumes:
+        - .:/composer
+
