@@ -21,9 +21,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 //use SimpleORM\Model;
 
-class SunApp {
-    private $app;
-    private $container;
+class SunApp extends \Slim\App {
     private $routables = [];
     private $whitelistableRoutes = [];
     public $config = [
@@ -36,20 +34,32 @@ class SunApp {
         'session.cookie_lifetime' => 1209600,   // int: 14 days is the default.
         'i18n.directory' => null,       // string: locale directory. If null, no locale will be set.
         'i18n.default' => 'en-us',      // string: the default locale. You will need a file with this extension
-        'i18n.domain' => 'default'      // string: the name of the file that will be used to find the string.
+        'i18n.domain' => 'default',     // string: the name of the file that will be used to find the string.
+        'debug' => false                // Set to true if you want to debug Slim
     ];
 
-    public function __construct($config = null) {
+    public function __construct($config, $container = [])
+    {
         if (is_array($config)) {
             $this->config = array_merge($this->config, $config);
         }
 
 //        $this->initDatabase();
+
         $this->initSession();
+
         if ($this->config['i18n.directory']) {
             $this->initI18n();
         }
-        $this->initApp();
+
+        $settings = [
+            'settings' => [
+                'determineRouteBeforeAppMiddleware' => true,
+                'displayErrorDetails' => true
+            ]
+        ];
+        parent::__construct(array_merge_recursive($container, $settings));
+
         if ($this->config['view.csrf']) {
             $this->initCsrf();
         }
@@ -57,14 +67,15 @@ class SunApp {
 //        //$this->initReCaptchaManager(); // TODO: might want to enable that later.
         $this->initView();
         $this->registerRoutes();
+
+    }
+
+    public function isDebug() {
+        return $this->config['debug'];
     }
 
     public function addLibrary(LibraryItem $item) {
         ScriptExtension::addLibrary($item);
-    }
-
-    public function run($silent = false) {
-        $this->app->run($silent);
     }
 
     private function initI18n() {
@@ -86,40 +97,27 @@ class SunApp {
         ]);
     }
 
-    private function initApp() {
-        $settings = [
-            'settings' => [
-                'determineRouteBeforeAppMiddleware' => true,
-                'displayErrorDetails' => true
-            ]/*,
-            'determineRouteBeforeAppMiddleware' => true,
-            'displayErrorDetails' => true*/
-        ];
-        $this->app = new \Slim\App($settings);
-        $this->container = $this->app->getContainer();
-    }
-
     private function initAuthManager() {
-        $this->container['authManager'] = function () {
+        $this->getContainer()['authManager'] = function () {
             $roleValidator = new RoleValidator();
             // TODO: set some variables $roleValidator->setDefaultMachine(User)
             return new AuthManager($roleValidator);
         };
-        $authManager = $this->container->get('authManager');
-        $this->app->add($authManager);
-        $this->app->authManager = $authManager;
+        $authManager = $this->getContainer()->get('authManager');
+        $this->add($authManager);
+        $this->authManager = $authManager; // TODO: should remove that... wait until refactor of auth manager
     }
 
     private function initReCaptchaManager() {
         $config = $this->config;
-        $this->container['reCaptchaManager'] = function () use ($config) {
+        $this->getContainer()['reCaptchaManager'] = function () use ($config) {
             return new ReCaptchaManager($config['reCaptcha']['secretKey']);
         };
-        $this->app->add($this->container->get('reCaptchaManager'));
+        $this->add($this->getContainer()->get('reCaptchaManager'));
     }
 
     private function initCsrf() {
-        $this->container['csrf'] = function () {
+        $this->getContainer()['csrf'] = function () {
             $csrf = new \Slim\Csrf\Guard();
 
             $csrf->setFailureCallable(function(ServerRequestInterface $request, ResponseInterface $response, callable $next) {
@@ -150,11 +148,11 @@ class SunApp {
             return $csrf;
         };
 
-        $this->app->add($this->container->get('csrf'));
+        $this->add($this->getContainer()->get('csrf'));
     }
 
     private function initView() {
-        $this->container['view'] = function ($container) {
+        $this->getContainer()['view'] = function ($container) {
             $view = new \Slim\Views\Twig($this->config['view.templates'], [
                 'cache' => $this->config['view.cache']
             ]);
@@ -181,7 +179,7 @@ class SunApp {
             $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
             $view->addExtension(new \Slim\Views\TwigExtension($router, $uri));
 
-            if (isset($this->container['csrf'])) {
+            if (isset($this->getContainer()['csrf'])) {
                 $view->addExtension(new CsrfExtension($container->get('csrf')));
             }
 
@@ -220,13 +218,13 @@ class SunApp {
                     if ($instance == null)
                         $instance = new $klass();
                     $this->routables[$klass] = $instance;
-                    $instance->registerRoute($this->app);
+                    $instance->registerRoute($this);
                 }
             }
         }
 
         if (is_callable($this->config['routes.custom'])) {
-            call_user_func($this->config['routes.custom'], $this->app);
+            call_user_func($this->config['routes.custom'], $this);
         }
     }
 

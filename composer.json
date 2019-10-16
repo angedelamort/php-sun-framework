@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "sunframework\\": "app/src/"
+            "SunFramework\\": "app/src/"
         }
     },
     "autoload-dev": {

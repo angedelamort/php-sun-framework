@@ -14,15 +14,15 @@ class LibraryItem {
     public $css = [];
     /** @var $cssMin array */
     public $cssMin = [];
-    /** @var $depends array */
-    public $depends = [];
+
+    //public $depends = [];
 
 
     public function __construct(string $name, $init = null) {
         $this->name = $name;
 
         if ($init != null) {
-            $keys = ['js', 'jsMin', 'css', 'cssMin', 'depends'];
+            $keys = ['js', 'jsMin', 'css', 'cssMin'/*, 'depends'*/];
             foreach ($keys as $key) {
                 if (array_key_exists($key, $init)) {
                     $this->add($key, $init[$key]);
@@ -47,9 +47,9 @@ class LibraryItem {
         return $this->add('cssMin', $value);
     }
 
-    public function addDepends($value) {
+    /*public function addDepends($value) {
         return $this->add('depends', $value);
-    }
+    }*/
 
     private function add(string $key, $value) {
         if (is_array($value)) {
