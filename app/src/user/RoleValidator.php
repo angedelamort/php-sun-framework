@@ -2,18 +2,19 @@
 namespace sunframework\user;
 
 use \Psr\Http\Message\ServerRequestInterface;
+use sunframework\system\StringUtil;
 
 class RoleValidator implements IRoleValidatorInterface {
 
-    public const ANONYMOUS = 0;
-    public const USER = 1;
-    public const POWER_USER = 2;
-    public const ADMIN = 3;
+    public const ROLE_ANONYMOUS = 0;
+    public const ROLE_USER = 1;
+    public const ROLE_POWER_USER = 2;
+    public const ROLE_ADMIN = 3;
 
     // todo: add permissions
 
     /** @var int By default, we want all pages to at least with a USER role. */
-    private $defaultRole = RoleValidator::ANONYMOUS;
+    private $defaultRole = RoleValidator::ROLE_ANONYMOUS;
     /** @var array Array of [route, min user access] */
     private $allowedRoutes = [];
 
@@ -50,5 +51,9 @@ class RoleValidator implements IRoleValidatorInterface {
         }
 
         return $userRole >= $this->defaultRole;
+    }
+
+    public function validateUserRole($role) {
+        return $this->getUserRole() >= $role;
     }
 }

@@ -2,6 +2,7 @@
 namespace sunframework;
 
 use HaydenPierce\ClassFinder\ClassFinder;
+use Slim\App;
 use sunframework\i18n\I18n;
 use sunframework\i18n\I18NTwigExtension;
 use sunframework\route\IRoutable;
@@ -9,21 +10,22 @@ use sunframework\route\IWhitelistable;
 use sunframework\twigExtensions\LibraryItem;
 use sunframework\user\AuthManager;
 use sunframework\user\RoleValidator;
-use sunframework\system\ReCaptchaManager;
 use sunframework\system\SSP;
 use sunframework\system\StringUtil;
 use sunframework\twigExtensions\CsrfExtension;
-use sunframework\twigExtensions\FormErrorExtension;
 use sunframework\twigExtensions\OperatorExtension;
-use sunframework\twigExtensions\ScriptExtension;
+use sunframework\twigExtensions\IncludeExtension;
 use sunframework\twigExtensions\SwitchTwigExtension;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-//use SimpleORM\Model;
+use sunframework\user\UserTwigExtension;
 
-class SunApp extends \Slim\App {
+
+class SunApp extends App {
     private $routables = [];
     private $whitelistableRoutes = [];
+    private $authManager;
+
     public $config = [
         'routes.controllers' => null,   // string|array<string>: Override with namespace(s) containing controllers (Must inherit from IRoutable).
         'routes.custom' => null,        // callback: If you just want to make a simple function for registering your routes.
@@ -52,22 +54,19 @@ class SunApp extends \Slim\App {
             $this->initI18n();
         }
 
-        $settings = [
+        parent::__construct(array_merge_recursive($container, [
             'settings' => [
                 'determineRouteBeforeAppMiddleware' => true,
                 'displayErrorDetails' => true
             ]
-        ];
-        parent::__construct(array_merge_recursive($container, $settings));
+        ]));
 
         if ($this->config['view.csrf']) {
             $this->initCsrf();
         }
-//        $this->initAuthManager();
-//        //$this->initReCaptchaManager(); // TODO: might want to enable that later.
+        $this->initAuthManager();
         $this->initView();
         $this->registerRoutes();
-
     }
 
     public function isDebug() {
@@ -75,7 +74,15 @@ class SunApp extends \Slim\App {
     }
 
     public function addLibrary(LibraryItem $item) {
-        ScriptExtension::addLibrary($item);
+        IncludeExtension::addLibrary($item);
+    }
+
+    public function getUser() {
+        return isset($_SESSION['user']) ? $_SESSION['user'] : null;
+    }
+
+    public function getUserRole() {
+        return isset($_SESSION['user_role']) ? $_SESSION['user_role'] : null;
     }
 
     private function initI18n() {
@@ -98,22 +105,7 @@ class SunApp extends \Slim\App {
     }
 
     private function initAuthManager() {
-        $this->getContainer()['authManager'] = function () {
-            $roleValidator = new RoleValidator();
-            // TODO: set some variables $roleValidator->setDefaultMachine(User)
-            return new AuthManager($roleValidator);
-        };
-        $authManager = $this->getContainer()->get('authManager');
-        $this->add($authManager);
-        $this->authManager = $authManager; // TODO: should remove that... wait until refactor of auth manager
-    }
-
-    private function initReCaptchaManager() {
-        $config = $this->config;
-        $this->getContainer()['reCaptchaManager'] = function () use ($config) {
-            return new ReCaptchaManager($config['reCaptcha']['secretKey']);
-        };
-        $this->add($this->getContainer()->get('reCaptchaManager'));
+        $this->authManager = new AuthManager(new RoleValidator());
     }
 
     private function initCsrf() {
@@ -157,23 +149,6 @@ class SunApp extends \Slim\App {
                 'cache' => $this->config['view.cache']
             ]);
 
-            // TODO: if you do modification to the user, you might want to re-update this variable?
-            // There is no "pre-render" method just before the render. But it will merge them together.
-            // So, we would need to overload the render or create a new one.
-            if (isset($_SESSION['user'])) {
-                $view->offsetSet('user', $_SESSION['user']);
-            }
-
-            // TODO: when extracting be sure to create a virtual function for adding global variables. Also, should be easy to add extensions... not just booleans.
-            //if (isset($_SESSION['admin'])) {
-                //$_SESSION['admin']
-                $view->offsetSet('admin', [ // TODO: Hardcoded.
-                    'permissions' => []
-                ]);
-            //}
-
-
-
             // NOTE: probably find a way to extract the twig extensions somewhere else. Not really nice here
             $router = $container->get('router');
             $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
@@ -184,10 +159,10 @@ class SunApp extends \Slim\App {
             }
 
             $view->addExtension(new SwitchTwigExtension()); //https://github.com/buzzingpixel/twig-switch
-            $view->addExtension(new FormErrorExtension());
             $view->addExtension(new I18NTwigExtension());
-            $view->addExtension(new ScriptExtension());
+            $view->addExtension(new IncludeExtension());
             $view->addExtension(new OperatorExtension());
+            $view->addExtension(new UserTwigExtension($this->authManager));
 
             if ($this->config['view.addExtension']) {
                 call_user_func($this->config['view.addExtension'], $view);

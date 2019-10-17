@@ -133,3 +133,10 @@ you don't like twig as a template engine, you can always use another one.
 * try to document all cases (twig, i18n, etc).
 * try to put back the SSP - really useful with datatables.net
 * make sure you can minify the versions of the local files if necessary.
+* Twig Global Variables
+    * user
+    * userRole
+    * csrf
+* explain the switch statement 
+* How to add extensions.
+* Explain registration of controllers.

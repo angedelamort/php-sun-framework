@@ -8,14 +8,12 @@
 
 namespace sunframework\twigExtensions;
 
-use Twig_Extension;
+use Twig\Extension\AbstractExtension;
 
-class SwitchTwigExtension extends Twig_Extension
-{
-    public function getTokenParsers(): array
-    {
+class SwitchTwigExtension extends AbstractExtension {
+    public function getTokenParsers(): array {
         return [
-            new SwitchTokenParser(),
+            new SwitchTokenParser()
         ];
     }
 }

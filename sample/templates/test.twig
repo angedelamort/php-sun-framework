@@ -7,8 +7,18 @@
 </head>
 <body>
 <div class="ui container">
-    <h1>{{ i18n('appName') }}</h1>
-    <p>Hello {{ user }}.</p>
+    <div class="ui segment">
+        <h1>{{ i18n('appName') }}</h1>
+        <p>Hello {{ user }}.</p>
+    </div>
+    <div class="ui segment">
+            <form class="ui form">
+                <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+
+                <input class="ui button" type="submit">
+            </form>
+    </div>
 </div>
 {{ js('jquery', 'semantic-ui') }}
 </body>

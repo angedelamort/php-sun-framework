@@ -15,10 +15,10 @@ class OperatorExtension extends AbstractExtension
 
             // Binary Operators
             [
-                '<<' => ['precedence' => 60, 'class' => LeftBitShift::class],
-                '>>' => ['precedence' => 60, 'class' => RightBitShift::class],
-                'b-left-shift' => ['precedence' => 60, 'class' => LeftBitShift::class],
-                'b-right-shift' => ['precedence' => 60, 'class' => RightBitShift::class]
+                '<<' => ['precedence' => 60, 'class' => OperatorLeftBitShift::class],
+                '>>' => ['precedence' => 60, 'class' => OperatorRightBitShift::class],
+                'b-left-shift' => ['precedence' => 60, 'class' => OperatorLeftBitShift::class],
+                'b-right-shift' => ['precedence' => 60, 'class' => OperatorRightBitShift::class]
             ]
         ];
     }

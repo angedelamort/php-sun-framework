@@ -15,6 +15,8 @@ interface IRoleValidatorInterface {
      */
     public function validateUserAccess(ServerRequestInterface $request);
 
+    public function validateUserRole($role);
+
     public function setUserRole(int $role);
 
     public function allow(string $baseRoute, int $minUserLevel);

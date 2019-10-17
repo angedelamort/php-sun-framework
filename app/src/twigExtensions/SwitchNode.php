@@ -8,16 +8,15 @@
 
 namespace sunframework\twigExtensions;
 
-use Twig_Node;
-use Twig_Compiler;
+use Twig\Compiler;
+use Twig\Node\Node;
 
 /**
  * Based on rejected Twig pull request: https://github.com/twigphp/Twig/pull/185
  */
-class SwitchNode extends Twig_Node
-{
-    public function compile(Twig_Compiler $compiler)
-    {
+class SwitchNode extends Node {
+
+    public function compile(Compiler $compiler) {
         $compiler
             ->addDebugInfo($this)
             ->write('switch (')
@@ -26,7 +25,7 @@ class SwitchNode extends Twig_Node
             ->indent();
 
         foreach ($this->getNode('cases') as $case) {
-            /** @var Twig_Node $case */
+            /** @var Node $case */
             // The 'body' node may have been removed by Twig if it was an empty text node in a sub-template,
             // outside of any blocks
             if (! $case->hasNode('body')) {

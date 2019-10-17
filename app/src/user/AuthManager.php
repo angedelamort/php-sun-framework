@@ -4,9 +4,16 @@ namespace sunframework\user;
 use \Psr\Http\Message\ServerRequestInterface;
 use \Psr\Http\Message\ResponseInterface;
 
+/**
+ * Class AuthManager
+ * @package sunframework\user
+ *
+ * Manage the authentication for a user. This is a really simple implementation.
+ * You can use the default RoleValidator if you want something out of the box.
+ */
 class AuthManager {
 
-    private $failureCallable; // TODO: add a setFailureCallback
+    private $failureCallable;
     private $roleValidator;
 
     /**
@@ -17,14 +24,9 @@ class AuthManager {
         $this->roleValidator = $roleValidator;
     }
 
-    public function allow(StringUtil $baseRoute, int $minUserLevel) {
-        $this->roleValidator->allow($baseRoute, $minUserLevel);
-    }
-
-    public function setUserRole(int $role) {
-        $this->roleValidator->setUserRole($role);
-    }
-
+    /**
+     * @return IRoleValidatorInterface
+     */
     public function getRoleValidator() {
         return $this->roleValidator;
     }

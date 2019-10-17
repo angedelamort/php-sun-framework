@@ -9,6 +9,7 @@ require "../../vendor/autoload.php";
 $app = new SunApp([
     'i18n.directory' => dirname(__DIR__) . '/locale',
     'view.templates' => dirname(__DIR__) . '/templates',
+    'view.csrf' => true,
     'routes.controllers' => 'sample\controllers'
 ]);
 
