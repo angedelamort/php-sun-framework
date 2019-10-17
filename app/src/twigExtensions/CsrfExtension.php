@@ -4,6 +4,7 @@ namespace sunframework\twigExtensions;
 use Slim\Csrf\Guard;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\TwigFunction;
 
 /**
  * register the the csrf token as a global variable
@@ -36,7 +37,17 @@ class CsrfExtension extends AbstractExtension  implements GlobalsInterface
         ];
     }
 
-    public function getName() {
-        return 'slim/csrf';
+    // TODO: add simple input with 1 function...
+    public function getFunctions() {
+        return [
+            new TwigFunction('csrf', [$this, 'generateCsrf'], ['is_safe' => ['html']]),
+        ];
+    }
+
+    public function generateCsrf() {
+        return '<input type="hidden" name="' . $this->csrf->getTokenNameKey() .
+            '" value="' . $this->csrf->getTokenName() .
+            '"><input type="hidden" name="' . $this->csrf->getTokenValueKey() .
+            '" value="' . $this->csrf->getTokenValue() . '">';
     }
 }
