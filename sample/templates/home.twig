@@ -9,13 +9,13 @@
 <div class="ui container">
     <div class="ui segment">
         <h1>{{ i18n('appName') }}</h1>
-        <p>Hello {{ user }}.</p>
-    </div>
-    <div class="ui segment">
-            <form class="ui form">
-                {{ csrf() }}
-                <input class="ui button" type="submit">
-            </form>
+        {% if user %}
+            <p>Hello {{ user.name }}.</p>
+            <a href="logout">log-out</a>
+        {% else %}
+            <p>You are currently not logged-in.</p>
+            <p>Please <a href="login">log-in</a></p>
+        {% endif %}
     </div>
 </div>
 {{ js('jquery', 'semantic-ui') }}

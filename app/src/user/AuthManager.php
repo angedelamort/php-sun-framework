@@ -9,7 +9,12 @@ use \Psr\Http\Message\ResponseInterface;
  * @package sunframework\user
  *
  * Manage the authentication for a user. This is a really simple implementation.
- * You can use the default RoleValidator if you want something out of the box.
+ * You can use the default UserSession if you want something out of the box.
+ *
+ * The AuthManager doesn't handle the persistence. You will need a separate module to load the
+ * user information and store it in the session using the IUserSessionInterface::setUser and
+ * IUserSessionInterface::setUserRole. (You could store it in a txt file, a mySQL DB or even in
+ * Amazon Dynamo DB)
  */
 class AuthManager {
 
@@ -18,17 +23,10 @@ class AuthManager {
 
     /**
      * Construct the Authentication Manager.
-     * @param IRoleValidatorInterface $roleValidator
+     * @param IUserSessionInterface $roleValidator
      */
-    public function __construct(IRoleValidatorInterface $roleValidator) {
+    public function __construct(IUserSessionInterface $roleValidator) {
         $this->roleValidator = $roleValidator;
-    }
-
-    /**
-     * @return IRoleValidatorInterface
-     */
-    public function getRoleValidator() {
-        return $this->roleValidator;
     }
 
     /**
@@ -64,9 +62,33 @@ class AuthManager {
         return $this->failureCallable;
     }
 
-    public function setFailureCallable($failureCallable)
-    {
+    public function setFailureCallable($failureCallable) {
         $this->failureCallable = $failureCallable;
         return $this;
+    }
+
+    public function validateUserRole($role) {
+        return $this->roleValidator->validateUserRole($role);
+    }
+
+    public function allow(string $baseRoute, int $minUserLevel) {
+        return $this->roleValidator->allow($baseRoute, $minUserLevel);
+    }
+
+    public function getUser()
+    {
+        return $this->roleValidator->getUser();
+    }
+
+    public function setUser($user) {
+        return $this->roleValidator->setUser($user);
+    }
+
+    public function getUserRoles() {
+        return $this->roleValidator->getUserRoles();
+    }
+
+    public function setUserRoles($role) {
+        return $this->roleValidator->setUserRoles($role);
     }
 }

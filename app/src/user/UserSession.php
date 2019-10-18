@@ -4,27 +4,43 @@ namespace sunframework\user;
 use \Psr\Http\Message\ServerRequestInterface;
 use sunframework\system\StringUtil;
 
-class RoleValidator implements IRoleValidatorInterface {
+/**
+ * Class UserSession
+ * @package sunframework\user
+ *
+ * This is a default and simple implementation of the IUserSessionInterface.
+ * You can create your own and initialize the AuthManager with it.
+ *
+ * This one is really straight forward and use 4 simple roles. We store the data
+ * in the $_SESSION['user'] and in the $_SESSION['user_role'].
+ */
+class UserSession implements IUserSessionInterface {
 
     public const ROLE_ANONYMOUS = 0;
     public const ROLE_USER = 1;
     public const ROLE_POWER_USER = 2;
     public const ROLE_ADMIN = 3;
 
-    // todo: add permissions
-
     /** @var int By default, we want all pages to at least with a USER role. */
-    private $defaultRole = RoleValidator::ROLE_ANONYMOUS;
+    private $defaultRole = UserSession::ROLE_ANONYMOUS;
     /** @var array Array of [route, min user access] */
     private $allowedRoutes = [];
 
 
-    public function getUserRole() {
+    public function getUserRoles() {
         return isset($_SESSION['user_role']) ? $_SESSION['user_role'] : $this->defaultRole;
     }
 
-    public function setUserRole(int $role) {
+    public function setUserRoles($role) {
         $_SESSION['user_role'] = $role;
+    }
+
+    public function getUser() {
+        return isset($_SESSION['user']) ? $_SESSION['user'] : $this->defaultRole;
+    }
+
+    public function setUser($user) {
+        $_SESSION['user'] = $user;
     }
 
     public function setDefaultRole(int $role) {
@@ -42,7 +58,7 @@ class RoleValidator implements IRoleValidatorInterface {
     public function validateUserAccess(ServerRequestInterface $request) {
         $route = $request->getAttribute('route');
         $path = $route->getPattern();
-        $userRole = $this->getUserRole();
+        $userRole = $this->getUserRoles();
 
         foreach ($this->allowedRoutes as $route => $minRole) {
             if (StringUtil::startsWith($path, $route)) {
@@ -53,7 +69,7 @@ class RoleValidator implements IRoleValidatorInterface {
         return $userRole >= $this->defaultRole;
     }
 
-    public function validateUserRole($role) {
-        return $this->getUserRole() >= $role;
+    public function validateUserRole($roles) {
+        return $this->getUserRoles() >= $roles;
     }
 }

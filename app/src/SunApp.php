@@ -9,7 +9,8 @@ use sunframework\route\IRoutable;
 use sunframework\route\IWhitelistable;
 use sunframework\twigExtensions\LibraryItem;
 use sunframework\user\AuthManager;
-use sunframework\user\RoleValidator;
+use sunframework\user\IUserSessionInterface;
+use sunframework\user\UserSession;
 use sunframework\system\SSP;
 use sunframework\system\StringUtil;
 use sunframework\twigExtensions\CsrfExtension;
@@ -24,6 +25,7 @@ use sunframework\user\UserTwigExtension;
 class SunApp extends App {
     private $routables = [];
     private $whitelistableRoutes = [];
+    /** @var AuthManager */
     private $authManager;
 
     public $config = [
@@ -37,6 +39,7 @@ class SunApp extends App {
         'i18n.directory' => null,       // string: locale directory. If null, no locale will be set.
         'i18n.default' => 'en-us',      // string: the default locale. You will need a file with this extension
         'i18n.domain' => 'default',     // string: the name of the file that will be used to find the string.
+        'auth.userSession' => null,     // IUserSessionInterface: The implementation you want to use. By default the UserSession will be used.
         'debug' => false                // Set to true if you want to debug Slim
     ];
 
@@ -77,12 +80,11 @@ class SunApp extends App {
         IncludeExtension::addLibrary($item);
     }
 
-    public function getUser() {
-        return isset($_SESSION['user']) ? $_SESSION['user'] : null;
-    }
-
-    public function getUserRole() {
-        return isset($_SESSION['user_role']) ? $_SESSION['user_role'] : null;
+    /**
+     * @return AuthManager
+     */
+    public function getAuthManager() {
+        return $this->authManager;
     }
 
     private function initI18n() {
@@ -105,7 +107,11 @@ class SunApp extends App {
     }
 
     private function initAuthManager() {
-        $this->authManager = new AuthManager(new RoleValidator());
+        if ($this->config['auth.userSession'] && is_subclass_of($this->config['auth.userSession'], IUserSessionInterface::class)) {
+            $this->authManager = new AuthManager($this->config['auth.userSession']);
+        } else {
+            $this->authManager = new AuthManager(new UserSession());
+        }
     }
 
     private function initCsrf() {

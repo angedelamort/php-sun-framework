@@ -133,7 +133,10 @@ todo: explains how it works (psr4) and how to implement it
 explains the role
 
 ### Templating
-Using twig (documentaion)
+Using twig (https://twig.symfony.com/doc/2.x/) It's a simple but powerful templating engine.
+
+I have added some helpers (extensions) in order to simplify some operations. See
+the rest of the section for more information. 
 
 #### Global Variables
 * ``user``: todo
@@ -141,9 +144,33 @@ Using twig (documentaion)
 * ``csrf``: todo
 
 #### Functions
-* ``js``: todo
-* ``css``: todo
-* ``js``: todo
+##### js & css
+This function is used to include registered libraries or just a normal file. 
+The goal is to simplify the templates. 
+
+The syntax is simple: ``{{ js(param1, param2, ...) }}``
+
+An Example:
+````
+{{ js('jquery', 'semantic-ui') }}
+{{ css('css/home.css') }}
+````
+
+*Note*: the ultimate goal for those macros would be to merge the files together
+and minify them (server-side) instead of running a separate process.
+
+##### csrf
+I created this one because we have to add hidden fields for the CSRF token. since it can be 
+annoying to repeat the same code over and over again, I created this small utility.
+You can have a look at the next section **CSRF Token** but it can be used like that:
+
+```
+<form method="POST" action="action.php">
+    {{ csrf() }}
+    <input type="text" name="test" />
+    <input type="submit" value="Submit">
+</form>
+```
 
 #### CSRF Token
 What is a CSRF Token?
@@ -186,10 +213,19 @@ Sometime you want to do a switch statement in your template.
 ```
 
 #### Adding new Twig Extension
-todo
+When the framework is adding twig extensions, you can be call by registering a callback when you
+initialize the app.
+
+```
+$app = new SunApp([
+    'view.addExtension' => function($view) {
+        $view->addExtension(new MyExtension());
+    }
+]);
+```
 
 ### Users and Authentication
-explain the simple model.
+todo: explain simply how to use and override
 
 ### Using Libraries / Incluides
 In the templating part, I've added an easy way to include files in a page. The reasons why:
@@ -198,4 +234,4 @@ In the templating part, I've added an easy way to include files in a page. The r
 3. Switching between the minified version and the standard one can be annoying.
 
 ### SSP
-serer-side datatables.net
+server-side datatables.net
