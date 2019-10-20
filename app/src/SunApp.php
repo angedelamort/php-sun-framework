@@ -15,7 +15,7 @@ use sunframework\system\SSP;
 use sunframework\system\StringUtil;
 use sunframework\twigExtensions\CsrfExtension;
 use sunframework\twigExtensions\OperatorExtension;
-use sunframework\twigExtensions\IncludeExtension;
+use sunframework\twigExtensions\LibraryExtension;
 use sunframework\twigExtensions\SwitchTwigExtension;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -77,7 +77,7 @@ class SunApp extends App {
     }
 
     public function addLibrary(LibraryItem $item) {
-        IncludeExtension::addLibrary($item);
+        LibraryExtension::addLibrary($item);
     }
 
     /**
@@ -166,7 +166,7 @@ class SunApp extends App {
 
             $view->addExtension(new SwitchTwigExtension()); //https://github.com/buzzingpixel/twig-switch
             $view->addExtension(new I18NTwigExtension());
-            $view->addExtension(new IncludeExtension());
+            $view->addExtension(new LibraryExtension());
             $view->addExtension(new OperatorExtension());
             $view->addExtension(new UserTwigExtension($this->authManager));
 

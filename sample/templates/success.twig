@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>state</title>
+    {{ css('semantic-ui') }}
+    {{ css('css/test.css') }}
+</head>
+<body>
+<div class="ui container">
+    <div class="ui segment">
+        <h1>Hangman</h1>
+        <h2>You won!</h2>
+        <h3>The word was '{{ word|join }}' and you did it in '{{ guessCount }}' guess.</h3>
+        <form class="ui form" action="state" method="POST">
+            {{ csrf() }}
+            <input class="ui button green" type="submit" value="New Game">
+        </form>
+    </div>
+</div>
+{{ js('jquery', 'semantic-ui') }}
+</body>
+</html>

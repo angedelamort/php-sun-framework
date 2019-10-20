@@ -233,5 +233,69 @@ In the templating part, I've added an easy way to include files in a page. The r
 2. It's always complicated to have the same version on all templates.
 3. Switching between the minified version and the standard one can be annoying.
 
+## Extras
+
+### State Machine
+You'll probably say: 'Why a new state machine?'. And I probably agree with you that there is already 
+really good state machines out there. But I wanted to create something with a twist.
+
+1. I wanted my state machine to be initialized lazily. Since the script loads every time,
+I don't want the whole state machine to be instanciated.
+2. I wanted to make a rendering oriented State Machine (MVC). In this case, its integrate
+beautifully with the controller model.
+
+This is not an advance state machine (no hierarchy) and the implementation is really 'naive'.
+
+To understand the idea properly, I would suggest you to try the sample 'hangman' and check 
+the code afterward. I made a really simple implementation of the game, but you can easily
+imagine the rest.
+
+For how it works:
+1. You define states with appropriate transitions
+2. You initialize a state machine with a state.
+3. You call step() on it and it will execute the transitions with their conditions.
+4. Once a transition occur, you have to handle the persistence.
+
+#### States
+A state contains transitions. You class must inherit the base class ``BaseState``.
+The base class contains a lot of default values that you can overwrite.
+```
+class FinalState extends BaseState {
+    public function __construct() {
+        parent::__construct();
+        
+        $mySimpleTransition = new Transition(NextState::name());
+        $this->addTransition($mySimpleTransition);
+    }
+}
+```
+
+#### Transitions
+Same as states, you can create your own transitions if you see a use case. Unlike States,
+you add conditions instead of transitions. By default, if a transition doesn't have any
+condition, it's always true.  
+
+Also, since **it's not recommended** to change a value in the verify, I've added an ``onExecute``
+callback at the end of the transition if the result is true.
+
+```
+$t = new Transition(NextState::name(), [$this, 'setLetter']);
+$t->addCondition(function (StateMachineContext $context) {
+    $val = intval($context->getRequest()->getParsedBodyParam('val'));
+    return $val < 10;
+});
+```
+
+So, in this example, if the post parameter 'val' is smaller than 10, the transition
+will be true and the state machine can go to the ``NextState``. 
+
+#### Factory
+Since it would be annoying to do a mapping table between the name of the state (that you 
+want to persist) and the class, I've added a small factory for that matter. Like the
+controllers, it's base on the 'haydenpierce/class-finder' package.
+
 ### SSP
 server-side datatables.net
+
+# TODO
+* fix the logging using monolog

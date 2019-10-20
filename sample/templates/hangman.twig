@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>state</title>
+    {{ css('semantic-ui') }}
+    {{ css('css/test.css') }}
+</head>
+<body>
+<div class="ui container">
+    <div class="ui segment">
+        <h1>Hangman</h1>
+        <h2>WORD:
+            {% for character in guess %}
+                {{ character }}
+            {% endfor %}
+        </h2>
+        <h3>Guess Count {{ guessCount }}</h3>
+        <form class="ui form" action="state" method="POST">
+            {{ csrf() }}
+            <div class="inline field">
+                <label>Guess a Letter</label>
+                <input type="text" name="letter" maxlength="1" placeholder="type a letter" tabindex="0" autofocus>
+            </div>
+            <input class="ui button green" type="submit" value="Try">
+        </form>
+    </div>
+</div>
+{{ js('jquery', 'semantic-ui') }}
+</body>
+</html>

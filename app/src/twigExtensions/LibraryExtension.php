@@ -6,10 +6,10 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 /**
- * Class IncludeExtension
+ * Class LibraryExtension
  * @package sunframework\system\twigExtensions
  */
-class IncludeExtension extends AbstractExtension
+class LibraryExtension extends AbstractExtension
 {
     private static $library = [];
     private static $isMin = true;
