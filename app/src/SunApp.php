@@ -2,6 +2,7 @@
 namespace sunframework;
 
 use HaydenPierce\ClassFinder\ClassFinder;
+use Monolog\Logger;
 use Slim\App;
 use sunframework\i18n\I18n;
 use sunframework\i18n\I18NTwigExtension;
@@ -23,6 +24,7 @@ use sunframework\user\UserTwigExtension;
 
 
 class SunApp extends App {
+    private $logger;
     private $routables = [];
     private $whitelistableRoutes = [];
     /** @var AuthManager */
@@ -33,7 +35,9 @@ class SunApp extends App {
         'routes.custom' => null,        // callback: If you just want to make a simple function for registering your routes.
         'view.templates' => '.',        // string|array<string>: directory where the twig templates are located.
         'view.cache' => false,          // bool: set to true to enable the cache
-        'view.csrf' => false,           // enable CSRF token. TODO: add doc for token in the form. See Also whitelisting.
+        'view.csrf' => false,           // enable CSRF token.
+        'view.csrf.redirect' => true,   // If there is a CSRF error, try to redirect to the GET instead of displaying an error.
+        'view.csrf.failure' => null,    // callback: If there is a CSRF error and you want to have a custom page.
         'view.addExtension' => null,    // callback($twig): If you want to register new extension
         'session.cookie_lifetime' => 1209600,   // int: 14 days is the default.
         'i18n.directory' => null,       // string: locale directory. If null, no locale will be set.
@@ -45,6 +49,7 @@ class SunApp extends App {
 
     public function __construct($config, $container = [])
     {
+        $this->logger = new Logger("sun-app");
         if (is_array($config)) {
             $this->config = array_merge($this->config, $config);
         }
@@ -88,9 +93,47 @@ class SunApp extends App {
     }
 
     private function initI18n() {
-        I18n::init($this->config['i18n.directory'], $this->config['i18n.default'], $this->config['i18n.domain']);
+        $lang = $this->config['i18n.default'];
 
-        // TODO: set the current language based on the user preferences.
+        if (!isset($_SESSION['_current-language'])) {
+            $this->logger->info("detecting languages: " . $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+            $languages = $this->getLanguages();
+            if (count($languages) > 0) {
+                $lang = array_key_first($languages);
+                // TODO: might be interesting to have in the i18n module a list of supported languages? Could default on other languages.
+                $_SESSION['_current-language'] = $lang;
+                $this->logger->info("setting language to $lang");
+            }
+        }
+
+        I18n::init($this->config['i18n.directory'], $lang, $this->config['i18n.domain']);
+    }
+
+    private function getLanguageFiles() {
+        // TODO -> file iterator and map extension with files.
+    }
+
+    private function getLanguages() {
+        $languages = [];
+
+        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches);
+
+            if (count($matches[1])) {
+                // map all in array
+                $languages = array_combine($matches[1], $matches[4]);
+                // and fill the empty one
+                foreach ($languages as $language => $val) {
+                    if ($val === '') {
+                        $languages[$language] = 1;
+                    }
+                }
+                // let's sort them
+                arsort($languages, SORT_NUMERIC);
+            }
+        }
+
+        return $languages;
     }
 
     private function initDatabase() {
@@ -129,17 +172,22 @@ class SunApp extends App {
                 }
 
                 // if a bad post, just try to reload the page.
-                if ($request->getMethod() == 'POST') {
-                    // TODO: add this mechanism in the config.
-                    error_log("it's a post, try to go to the GET with same address\n");
+                if ($this->config['view.csrf.redirect'] && $request->getMethod() == 'POST') {
+                    $this->logger->info("it's a post, try to go to the GET with same address");
                     return $response->withStatus(302)->withHeader('Location', $request->getUri());
                 }
 
                 // if other type of error,
-                $body = new \Slim\Http\Body(fopen('php://temp', 'r+'));
-                $body->write('Failed CSRF check!'); // TODO: add a link? or a better page? or redirect to a page...
+                $cb = $this->config['view.csrf.failure'];
+                if ($cb && is_callable($cb)) {
+                    return call_user_func($cb, $request, $response);
+                }
 
-                error_log("CSRF error\n");
+                // TODO: use twig?
+                $body = new \Slim\Http\Body(fopen('php://temp', 'r+'));
+                $body->write('Failed CSRF check!');
+
+                $this->logger->warn("CSRF error");
                 return $response->withStatus(400)->withHeader('Content-type', 'text/plain')->withBody($body);
             });
 
@@ -173,13 +221,6 @@ class SunApp extends App {
             if ($this->config['view.addExtension']) {
                 call_user_func($this->config['view.addExtension'], $view);
             }
-
-            // try to add a style include css to minify.
-            // TODO later and probably use mySQL? but not sure it'S a good idea...
-            //$view->getEnvironment()->addTokenParser(new \sunframework\system\twigExtensions\IncludeStyle_TokenParser([
-            //    'src' => 'path/to/parse/css',
-            //    'dst' => 'path/to/export/css'
-            //]));
 
             return $view;
         };

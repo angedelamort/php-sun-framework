@@ -73,19 +73,19 @@ class InitState extends BaseState {
 
     private function initStateMachine(): void
     {
-        $finalTransition = new Transition(FinalState::name(), [$this, 'setLetter']);
+        $finalTransition = new Transition(FinalState::name(), [$this, 'setLetter'], 'completed');
         $finalTransition->addCondition(function (StateMachineContext $context) {
             return self::isCompleted($context->getRequest()->getParsedBodyParam('letter'));
         });
         $this->addTransition($finalTransition);
 
-        $successTransition = new Transition(InitState::name(), [$this, 'setLetter']);
+        $successTransition = new Transition(InitState::name(), [$this, 'setLetter'], 'goodGuess');
         $successTransition->addCondition(function (StateMachineContext $context) {
             return self::isNewLetter($context->getRequest()->getParsedBodyParam('letter'));
         });
         $this->addTransition($successTransition);
 
-        $failTransition = new Transition(InitState::name(), [$this, 'increaseGuess']);
+        $failTransition = new Transition(InitState::name(), [$this, 'increaseGuess'], 'badGuess');
         $this->addTransition($failTransition);
     }
 }

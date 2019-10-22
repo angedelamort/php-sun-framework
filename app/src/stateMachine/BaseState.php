@@ -23,6 +23,11 @@ abstract class BaseState {
         return self::name();
     }
 
+    public function toString() {
+        $count = count($this->transitions);
+        return $this->getName() . " {transitionCount: $count}";
+    }
+
     public static function name() {
         $name = get_called_class();
         $index = strrpos(get_called_class(), '\\');
@@ -56,9 +61,9 @@ abstract class BaseState {
     public function transition(StateMachineContext $context) {
         /** @var $transition Transition */
         foreach ($this->transitions as $transition) {
-            $this->logger->info("    testing transition -> " . get_class($transition));
+            $this->logger->info(" - testing transition -> " . $transition->toString());
             if ($transition->isSatisfied($context)) {
-                $this->logger->info("        Transition succeeded -> " . get_class($transition));
+                $this->logger->info("   - transition satisfied!");
                 $transition->execute($context);
                 return $transition->getState();
             }

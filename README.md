@@ -7,6 +7,7 @@ another simple PHP framework.
 * i18n (internationalization) - custom
 * Simple User Management - custom
 * CSRF Token - twig
+* Rendering State Machine - custom
 * server-side tables integration - DataTables.net (remove?)
 
 ## Installing
@@ -299,3 +300,5 @@ server-side datatables.net
 
 # TODO
 * fix the logging using monolog
+* finish the database migration and make an updater instead (git/zip/etc)
+* finish the i18n properly.

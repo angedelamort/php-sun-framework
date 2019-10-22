@@ -11,10 +11,13 @@ class Transition {
     private $conditions = [];
     /** @var callable(StateMachineContext sm)  */
     private $onExecute;
+    /** @var string */
+    private $name;
 
-    public function __construct(string $stateTarget, callable $onExecute = null) {
+    public function __construct(string $stateTarget, callable $onExecute = null, $name = null) {
         $this->stateTarget = $stateTarget;
         $this->onExecute = $onExecute;
+        $this->name = $name;
     }
 
     /**
@@ -57,5 +60,10 @@ class Transition {
     public final function addCondition(callable $condition) {
         array_unshift($this->conditions, $condition);
         return $this;
+    }
+
+    public function toString() {
+        $count = count($this->conditions);
+        return ($this->name ? $this->name : get_called_class()) . " {conditionCount: $count}";
     }
 }

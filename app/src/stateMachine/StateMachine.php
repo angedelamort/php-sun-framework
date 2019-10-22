@@ -54,7 +54,6 @@ class StateMachine {
         }
 
         $this->setState($initialState);
-        $this->logger->info("initialize -> " . $initialState::getName());
     }
 
     /**
@@ -62,7 +61,7 @@ class StateMachine {
      */
     public function setState(BaseState $state) {
         $this->currentState = $state;
-        $this->logger->info("set new state -> " . $state::getName());
+        $this->logger->info("set state -> " . $state->getName());
     }
 
     /**
@@ -78,10 +77,9 @@ class StateMachine {
      * @throws Exception
      */
     public function step(StateMachineContext $context) {
-        $this->logger->info("stepping in " . $this->currentState::getName());
+        $this->logger->info("step in -> " . $this->currentState->toString());
         $newState = $this->currentState->transition($context);
         if ($newState != null) {
-            $this->logger->info("transition successful to -> " . $newState);
             $this->setState(StateFactory::createFromName($newState, $this->statesNamespace));
             return true;
         }

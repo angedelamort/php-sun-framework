@@ -12,7 +12,7 @@ class FinalState extends BaseState {
     public function __construct() {
         parent::__construct();
 
-        $failTransition = new Transition(InitState::name(), [$this, 'newGame']);
+        $failTransition = new Transition(InitState::name(), [$this, 'newGame'], 'toNewGame');
         $this->addTransition($failTransition);
     }
 
