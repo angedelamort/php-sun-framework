@@ -86,7 +86,51 @@ final class I18n {
         I18n::$defaultLanguage = I18n::$currentLanguage = $defaultLanguage;
         I18n::$domain = $domain;
         I18n::$localisationTable = I18n::$defaultLocalisationTable  = I18n::$currentLocalisationTable = I18n::getTable($defaultLanguage);
+
+        // TODO:
+        // 1. parse all files in the directory and map them properly in a map
+        // 2. try to find the default language -> if not there throw an exception.
+        // 3. try to get the user language using header and match it.
+        // 4. save the user language in a cookie so we don't do all this code all over again.
+        // 5. create a cache with a json by configuration instead of in-memory-cache -> will be faster for fetching.
+        //  5.1. Use dates to check if cache older than files?
+        // https://packagist.org/packages/phpfastcache/phpfastcache
+
+
+        /*if (!isset($_SESSION['_current-language'])) {
+            $this->logger->info("detecting languages: " . $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+            $languages = $this->getLanguages();
+            if (count($languages) > 0) {
+                $lang = array_key_first($languages);
+                // TODO: might be interesting to have in the i18n module a list of supported languages? Could default on other languages.
+                $_SESSION['current-language'] = $lang;
+                $this->logger->info("setting language to $lang");
+            }
+        }*/
     }
+
+    /*private function getLanguages() {
+        $languages = [];
+
+        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches);
+
+            if (count($matches[1])) {
+                // map all in array
+                $languages = array_combine($matches[1], $matches[4]);
+                // and fill the empty one
+                foreach ($languages as $language => $val) {
+                    if ($val === '') {
+                        $languages[$language] = 1;
+                    }
+                }
+                // let's sort them
+                arsort($languages, SORT_NUMERIC);
+            }
+        }
+
+        return $languages;
+    }*/
 
     public static function setLanguage(string $language) {
         I18n::$currentLanguage = $language;

@@ -19,7 +19,8 @@
         "ramsey/uuid": "^3.8",
         "erusev/parsedown": "^1.7",
         "haydenpierce/class-finder" : "^0.3",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {

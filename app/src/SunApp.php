@@ -95,45 +95,7 @@ class SunApp extends App {
     private function initI18n() {
         $lang = $this->config['i18n.default'];
 
-        if (!isset($_SESSION['_current-language'])) {
-            $this->logger->info("detecting languages: " . $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-            $languages = $this->getLanguages();
-            if (count($languages) > 0) {
-                $lang = array_key_first($languages);
-                // TODO: might be interesting to have in the i18n module a list of supported languages? Could default on other languages.
-                $_SESSION['_current-language'] = $lang;
-                $this->logger->info("setting language to $lang");
-            }
-        }
-
         I18n::init($this->config['i18n.directory'], $lang, $this->config['i18n.domain']);
-    }
-
-    private function getLanguageFiles() {
-        // TODO -> file iterator and map extension with files.
-    }
-
-    private function getLanguages() {
-        $languages = [];
-
-        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-            preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches);
-
-            if (count($matches[1])) {
-                // map all in array
-                $languages = array_combine($matches[1], $matches[4]);
-                // and fill the empty one
-                foreach ($languages as $language => $val) {
-                    if ($val === '') {
-                        $languages[$language] = 1;
-                    }
-                }
-                // let's sort them
-                arsort($languages, SORT_NUMERIC);
-            }
-        }
-
-        return $languages;
     }
 
     private function initDatabase() {
