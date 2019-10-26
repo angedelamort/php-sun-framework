@@ -8,6 +8,7 @@ another simple PHP framework.
 * Simple User Management - custom
 * CSRF Token - twig
 * Rendering State Machine - custom
+* Cache - custom
 * server-side tables integration - DataTables.net (remove?)
 
 ## Installing
@@ -15,6 +16,17 @@ another simple PHP framework.
 ````
 composer require "angedelamort/php-sun-framework"
 ````
+
+### Running all tests
+```
+composer run tests
+```
+
+### Using docker-compose
+Just prefix the commands
+```
+docker-compose run %composer-command%
+```
 
 ## Using
 Quick start without using too much configuration.

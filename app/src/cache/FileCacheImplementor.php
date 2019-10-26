@@ -4,7 +4,11 @@ namespace sunframework\cache;
 
 use DateInterval;
 use DateTime;
+use DateTimeZone;
 use Exception;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class FileCacheImplementor implements ICacheImplementor {
 
@@ -35,30 +39,28 @@ class FileCacheImplementor implements ICacheImplementor {
      */
     public function get(string $key) {
         $filename = $this->getFilename($key);
-        $result = file_get_contents($filename);
-        if ($result !== FALSE) {
-            $item = json_decode($result);
+        if (file_exists($filename)) {
+            $item = $this->fromData($filename);
             if ($item->key !== $key) {
                 throw new Exception("Key Collision between '$key' and '$item[key]'");
             }
 
             $now = new DateTime();
-            if ($item->absoluteExpiration && $now >= new DateTime($item->absoluteExpiration)) {
+            if ($item->absoluteExpiration && $now >= $item->absoluteExpiration) {
                 $this->delete($key, $filename, 'expired');
                 return FALSE;
             }  else if ($item->slidingExpiration) {
-                if ($now >= new DateTime($item->slidingExpirationEnd)) {
+                if ($now >= $item->slidingExpirationEnd) {
                     $this->delete($key, $filename, 'expired');
                     return FALSE;
                 } else {
-                    $item->slidingExpirationEnd = $now->add(new DateInterval($item->slidingExpiration));
-                    file_put_contents($filename, $item);
+                    $item->slidingExpirationEnd = $now->add($item->slidingExpiration);
+                    file_put_contents($filename, $this->toData($item->key, $item->value, $item->dependency, $item->absoluteExpiration, $item->slidingExpiration));
                 }
             }
 
-            if ($item->cacheDependency) {
-                $dep = CacheDependency::deserialize($item->cacheDependency);
-                if ($dep->hasChanged($this)) {
+            if ($item->dependency) {
+                if ($item->dependency->hasChanged($this)) {
                     $this->delete($key, $filename, 'dependency');
                     return FALSE;
                 }
@@ -70,16 +72,16 @@ class FileCacheImplementor implements ICacheImplementor {
         return FALSE;
     }
 
-    public function add(string $key, $value, CacheDependency $dependency, DateTime $absoluteExpiration, DateInterval $slidingExpiration) {
+    public function add(string $key, $value, ?CacheDependency $dependency, ?DateTime $absoluteExpiration, ?DateInterval $slidingExpiration) {
         $filename = $this->getFilename($key);
-        if (file_get_contents($filename) === FALSE) {
+        if (!file_exists($filename)) {
             file_put_contents($filename, $this->toData($key, $value, $dependency, $absoluteExpiration, $slidingExpiration));
             return $value;
         }
-        return null;
+        return FALSE;
     }
 
-    public function insert(string $key, $value, CacheDependency $dependency, DateTime $absoluteExpiration, DateInterval $slidingExpiration) {
+    public function insert(string $key, $value, ?CacheDependency $dependency, ?DateTime $absoluteExpiration, ?DateInterval $slidingExpiration) {
         $filename = $this->getFilename($key);
         file_put_contents($filename, $this->toData($key, $value, $dependency, $absoluteExpiration, $slidingExpiration));
         return $value;
@@ -87,9 +89,11 @@ class FileCacheImplementor implements ICacheImplementor {
 
     public function remove(string $key) {
         $filename = $this->getFilename($key);
-        if (file_get_contents($filename) !== FALSE) {
+        if (file_exists($filename)) {
             $this->delete($key, $filename, 'user');
+            return TRUE;
         }
+        return FALSE;
     }
 
     public function getFilename($key) {
@@ -103,15 +107,53 @@ class FileCacheImplementor implements ICacheImplementor {
         }
     }
 
-    private function toData(string $key, $value, CacheDependency $dependency, DateTime $absoluteExpiration, DateInterval $slidingExpiration) {
-        $dependency->updateKeys($this); // we need to somehow update the keys with the values of this specific cache. Seems the best place, right after adding.
-        return [
+    /**
+     * @param $filename
+     * @return false|string
+     * @throws Exception
+     */
+    private function fromData($filename) {
+        $result = json_decode(file_get_contents($filename));
+
+        // Need to "reconstruct the objects since deserialization create them with stdclass(object)"
+        if ($result->absoluteExpiration) {
+            $result->absoluteExpiration = new DateTime($result->absoluteExpiration->date, new DateTimeZone($result->absoluteExpiration->timezone));
+        }
+        if ($result->slidingExpiration) {
+            $result->slidingExpiration = new DateInterval($result->slidingExpiration);
+            $result->slidingExpirationEnd = new DateTime($result->slidingExpirationEnd->date, new DateTimeZone($result->slidingExpirationEnd->timezone));
+        }
+        if ($result->dependency) {
+            $result->dependency = CacheDependency::deserialize($result->dependency);
+        }
+
+        return $result;
+    }
+
+    private function toData(string $key, $value, ?CacheDependency $dependency, ?DateTime $absoluteExpiration, ?DateInterval $slidingExpiration) {
+        if ($dependency) {
+            // we need to somehow update the keys with the values of this specific cache. Seems the best place, right after adding.
+            $dependency->updateKeys($this);
+        }
+
+        return json_encode([
             'key' => $key,
             'value' => $value,
             'absoluteExpiration' => $absoluteExpiration,
-            'slidingExpiration' => $slidingExpiration,
-            'slidingExpirationEnd' => (new DateTime())->add($slidingExpiration),
+            'slidingExpiration' => $slidingExpiration ? $slidingExpiration->format("P%yY%mM%dDT%hH%iM%sS") : null,
+            'slidingExpirationEnd' => $slidingExpiration ? (new DateTime())->add($slidingExpiration) : null,
             'dependency' => CacheDependency::serialize($dependency)
-        ];
+        ], JSON_PRETTY_PRINT);
+    }
+
+    public function clear() {
+        $directories = new RecursiveDirectoryIterator($this->cachePath, FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);
+        $files = new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST );
+
+        foreach ($files as $value ) {
+            $value->isFile() ? unlink($value) : rmdir($value);
+        }
+
+        //rmdir( $this->cachePath );
     }
 }

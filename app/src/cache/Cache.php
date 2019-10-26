@@ -44,6 +44,10 @@ final class Cache {
         }
     }
 
+    public function clear() {
+        $this->cacheImp->clear();
+    }
+
     /**
      * Retrieves the specified item from the Cache object.
      * @param string $key The identifier for the cache item to retrieve.
@@ -62,10 +66,10 @@ final class Cache {
      * @param CacheDependency|null $dependency The file. When any dependency changes, the object becomes invalid and is removed from the cache.
      * @param DateTime|null $absoluteExpiration The time at which the added object expires and is removed from the cache. If you are using sliding expiration, the absoluteExpiration parameter must be null
      * @param DateInterval|null $slidingExpiration The interval between the time the added object was last accessed and the time at which that object expires.
-     * @return object The item that was added, null otherwise.
+     * @return object|bool The item that was added, null otherwise.
      */
-    public function add(string $key, $value, CacheDependency $dependency = null,
-                        DateTime $absoluteExpiration = null, DateInterval $slidingExpiration = null) {
+    public function add(string $key, $value, ?CacheDependency $dependency = null,
+                        ?DateTime $absoluteExpiration = null, ?DateInterval $slidingExpiration = null) {
         return $this->cacheImp->add($key, $value, $dependency, $absoluteExpiration, $slidingExpiration);
     }
 
@@ -79,8 +83,8 @@ final class Cache {
      * @param DateInterval|null $slidingExpiration The interval between the time the added object was last accessed and the time at which that object expires.
      * @return object The item that was added/updated.
      */
-    public function insert(string $key, $value, CacheDependency $dependency = null,
-                        DateTime $absoluteExpiration = null, DateInterval $slidingExpiration = null) {
+    public function insert(string $key, $value, ?CacheDependency $dependency = null,
+                        ?DateTime $absoluteExpiration = null, ?DateInterval $slidingExpiration = null) {
         return $this->cacheImp->insert($key, $value, $dependency, $absoluteExpiration, $slidingExpiration);
     }
 
@@ -89,6 +93,6 @@ final class Cache {
      * @param string $key The cache key used to reference the item.
      */
     public function remove(string $key) {
-        return $this->cacheImp->remove($key);
+        $this->cacheImp->remove($key);
     }
 }

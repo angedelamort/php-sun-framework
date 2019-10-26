@@ -24,12 +24,18 @@
     },
     "autoload": {
         "psr-4": {
-            "SunFramework\\": "app/src/"
+            "sunframework\\": "app/src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "sample\\": "sample/app/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "8"
+    },
+    "scripts": {
+        "tests" : "./vendor/bin/phpunit --bootstrap vendor/autoload.php tests"
     }
 }

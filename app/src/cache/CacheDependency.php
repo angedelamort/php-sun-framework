@@ -45,16 +45,42 @@ class CacheDependency {
         } else if ($cacheKeys != null) {
             throw new InvalidArgumentException("cacheKeys");
         }
+        if ($this->keys) {
+            $this->initKeys($this->keys);
+        }
+    }
+
+    private function getFileInformation($file) {
+        if (file_exists($file)) {
+            return [
+                "exists" => true,
+                "modified" => filemtime($file),
+                "fileSize" => filesize($file),
+                "hash" => md5_file($file),
+                "filename" => $file
+            ];
+        }
+
+        return [
+            "exists" => false,
+            "modified" => 0,
+            "fileSize" => 0,
+            "hash" => 0,
+            "filename" => $file
+        ];
+    }
+
+    private function fileHasChanged($item) {
+        return $item['exists'] !== file_exists($item['filename']) ||
+            $item['modified'] !== filemtime($item['filename']) ||
+            $item['fileSize'] !== filesize($item['filename']) ||
+            $item['hash'] !== md5_file($item['filename']);
     }
 
     public function hasChanged(ICacheImplementor $cache) {
         if ($this->files != null) {
             foreach ($this->files as $fileItem) {
-                $filename = $fileItem['filename'];
-                $check = file_exists($filename) ? filemtime($filename) : 0;
-                if ($check != $fileItem['modified']) {
-                    return true;
-                }
+                return $this->fileHasChanged($fileItem);
             }
         }
 
@@ -69,32 +95,36 @@ class CacheDependency {
         return false;
     }
 
-    public static function serialize(CacheDependency $dependency) {
-        return ['files' => $dependency->files, 'keys' => $dependency->keys];
+    public static function serialize(?CacheDependency $dependency) {
+        if ($dependency)
+            return ['files' => $dependency->files, 'keys' => $dependency->keys];
+        return null;
     }
 
-    public static function deserialize(array $value) {
-        $cd = new CacheDependency(null, null);
-        $cd->files = $value['files'];
-        $cd->keys = $value['keys'];
+    public static function deserialize($value) {
+        if ($value) {
+            $value = json_decode(json_encode($value), true); // TODO: parent should be an array as well.
+            $cd = new CacheDependency(null, null);
+            $cd->files = (array)$value['files'];
+            $cd->keys = (array)$value['keys'];
 
-        return $cd;
+            return $cd;
+        }
+
+        return null;
     }
 
     private function initFiles(array $filenames) {
         $this->files = [];
         foreach ($filenames as $filename) {
-            $this->files[] = [
-                'filename' => $filename,
-                'modified' => file_exists($filename) ? filemtime($filename) : 0
-            ];
+            $this->files[] = $this->getFileInformation($filename);
         }
     }
 
-    public function initKeys($keys) {
+    private function initKeys($keys) {
         $this->keys = [];
         foreach ($keys as $key) {
-            $this->files[] = [
+            $this->keys[] = [
                 'key' => $key,
                 'value' => null
             ];
@@ -104,7 +134,9 @@ class CacheDependency {
     public function updateKeys(ICacheImplementor $cache) {
         if ($this->keys != null) {
             foreach ($this->keys as &$keyItem) {
-                $keyItem['value'] = $cache->get($keyItem['key']);
+                if (isset($keyItem['key'])) {
+                    $keyItem['value'] = $cache->get($keyItem['key']);
+                }
             }
         }
     }

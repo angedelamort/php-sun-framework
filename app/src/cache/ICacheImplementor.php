@@ -10,4 +10,5 @@ interface ICacheImplementor {
     public function add(string $key, $value, CacheDependency $dependency, DateTime $absoluteExpiration, DateInterval $slidingExpiration);
     public function insert(string $key, $value, CacheDependency $dependency, DateTime $absoluteExpiration, DateInterval $slidingExpiration);
     public function remove(string $key);
+    public function clear();
 }
