@@ -19,6 +19,19 @@ abstract class Cache {
      * @var $cacheImp ICacheImplementor
      */
     private $cacheImp;
+    /** @var Cache */
+    private static $globalCache = null;
+
+    public static function initGlobalCache(Cache $cache) {
+        Cache::$globalCache = $cache;
+    }
+
+    /**
+     * @return Cache
+     */
+    public static function global() {
+        return Cache::$globalCache;
+    }
 
     /**
      * Cache constructor.

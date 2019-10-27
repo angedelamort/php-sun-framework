@@ -6,7 +6,7 @@ use Exception;
 use Monolog\Logger;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use sunframework\cache\CacheFactory;
+use sunframework\cache\Cache;
 
 /**
  * Class I18n
@@ -159,8 +159,8 @@ final class I18n {
      * @throws Exception
      */
     private static function initTable() {
-        if (CacheFactory::instance()) {
-            I18n::$localisationTable = CacheFactory::instance()->get('i18n-cache-localization-table');
+        if (Cache::global()) {
+            I18n::$localisationTable = Cache::global()->get('i18n-cache-localization-table');
             if (I18n::$localisationTable) {
                 return true;
             }
@@ -206,8 +206,8 @@ final class I18n {
             }
         }
 
-        if (CacheFactory::instance()) {
-            CacheFactory::instance()->insert('i18n-cache-localization-table', I18n::$localisationTable);
+        if (Cache::global()) {
+            Cache::global()->insert('i18n-cache-localization-table', I18n::$localisationTable);
         }
 
         return false;
