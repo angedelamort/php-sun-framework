@@ -26,6 +26,9 @@ final class CacheFactory {
         self::$cache = new Cache($options, $onRemove);
     }
 
+    /**
+     * @return Cache
+     */
     public static function instance() {
         return self::$cache;
     }

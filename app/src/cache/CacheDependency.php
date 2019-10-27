@@ -2,7 +2,6 @@
 
 namespace sunframework\cache;
 
-use Exception;
 use InvalidArgumentException;
 
 /**
@@ -13,7 +12,8 @@ use InvalidArgumentException;
  * an array of either. The CacheDependency class monitors the dependency relationships so that when any of
  * them changes, the cached item will be automatically removed.
  *
- * Note: For now, cannot watch directories
+ * Note: For now, cannot watch directories for now.
+ * Note: Would be nice to use: https://www.php.net/manual/en/book.inotify.php
  */
 class CacheDependency {
 
@@ -74,7 +74,7 @@ class CacheDependency {
         return $item['exists'] !== file_exists($item['filename']) ||
             $item['modified'] !== filemtime($item['filename']) ||
             $item['fileSize'] !== filesize($item['filename']) ||
-            $item['hash'] !== md5_file($item['filename']);
+            $item['hash'] !== md5_file($item['filename']); // NOTE: not sure about the MD5 -> could be super slow...
     }
 
     public function hasChanged(ICacheImplementor $cache) {

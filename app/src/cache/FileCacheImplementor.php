@@ -4,7 +4,6 @@ namespace sunframework\cache;
 
 use DateInterval;
 use DateTime;
-use DateTimeZone;
 use Exception;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
@@ -23,7 +22,7 @@ class FileCacheImplementor implements ICacheImplementor {
      */
     public function __construct(string $cachePath, $onRemove = null) {
         if (!file_exists($cachePath)) {
-            if (!mkdir($cachePath)) {
+            if (!mkdir($cachePath, 0755, TRUE)) {
                 throw new Exception("Could not create the path '$cachePath'. Check your permission or the given path is valid.");
             }
         }
@@ -109,25 +108,10 @@ class FileCacheImplementor implements ICacheImplementor {
 
     /**
      * @param $filename
-     * @return false|string
-     * @throws Exception
+     * @return CacheItem
      */
     private function fromData($filename) {
-        $result = json_decode(file_get_contents($filename));
-
-        // Need to "reconstruct the objects since deserialization create them with stdclass(object)"
-        if ($result->absoluteExpiration) {
-            $result->absoluteExpiration = new DateTime($result->absoluteExpiration->date, new DateTimeZone($result->absoluteExpiration->timezone));
-        }
-        if ($result->slidingExpiration) {
-            $result->slidingExpiration = new DateInterval($result->slidingExpiration);
-            $result->slidingExpirationEnd = new DateTime($result->slidingExpirationEnd->date, new DateTimeZone($result->slidingExpirationEnd->timezone));
-        }
-        if ($result->dependency) {
-            $result->dependency = CacheDependency::deserialize($result->dependency);
-        }
-
-        return $result;
+        return unserialize(file_get_contents($filename));
     }
 
     private function toData(string $key, $value, ?CacheDependency $dependency, ?DateTime $absoluteExpiration, ?DateInterval $slidingExpiration) {
@@ -136,14 +120,7 @@ class FileCacheImplementor implements ICacheImplementor {
             $dependency->updateKeys($this);
         }
 
-        return json_encode([
-            'key' => $key,
-            'value' => $value,
-            'absoluteExpiration' => $absoluteExpiration,
-            'slidingExpiration' => $slidingExpiration ? $slidingExpiration->format("P%yY%mM%dDT%hH%iM%sS") : null,
-            'slidingExpirationEnd' => $slidingExpiration ? (new DateTime())->add($slidingExpiration) : null,
-            'dependency' => CacheDependency::serialize($dependency)
-        ], JSON_PRETTY_PRINT);
+        return serialize(new CacheItem($key, $value, $absoluteExpiration, $slidingExpiration, $dependency));
     }
 
     public function clear() {

@@ -30,6 +30,7 @@ class SunApp extends App {
     /** @var AuthManager */
     private $authManager;
 
+    // TODO: make an object
     public $config = [
         'routes.controllers' => null,   // string|array<string>: Override with namespace(s) containing controllers (Must inherit from IRoutable).
         'routes.custom' => null,        // callback: If you just want to make a simple function for registering your routes.

@@ -36,6 +36,6 @@
         "phpunit/phpunit": "8"
     },
     "scripts": {
-        "tests" : "./vendor/bin/phpunit --bootstrap vendor/autoload.php tests"
+        "tests" : "./vendor/bin/phpunit --bootstrap vendor/autoload.php tests/I18nTest.php"
     }
 }
