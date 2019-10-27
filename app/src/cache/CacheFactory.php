@@ -22,6 +22,7 @@ final class CacheFactory {
      * @param callback $onRemove See Cache constructor
      * @throws Exception
      */
+    // TODO: make some parameters or use an object.
     public static function init(array $options, $onRemove = null) {
         self::$cache = new Cache($options, $onRemove);
     }

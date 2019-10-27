@@ -32,7 +32,7 @@ final class I18n {
     /** @var string  */
     public const DEFAULT_VALUE = '<key not found>';
     private const FILENAME_PATTERN = "/\/(?<domain>\w+)\.(?<languageTag>(?<isoCode>[a-z]{2})?(-(?<countryCode>[A-Z]{2}))?)\.php$/";
-    private const LANGUAGE_PATTERN = "^([a-z]{2})(-([A-Z]{2}))?/$";
+    private const LANGUAGE_PATTERN = "/^([a-z]{2})(-([A-Z]{2}))?$/";
 
     /**
      * Get the corresponding text from the key and optionally an option.
@@ -47,7 +47,7 @@ final class I18n {
      * @param $options mixed Can be a default value (string) or replace (array) and options (object).
      * @return string the resulting string.
      */
-    public static function text(string $key, I18nOptions $options = null) {
+    public static function text(string $key, $options = null) {
         $defaultValue = I18n::$defaultValue;
         $domain = I18n::$domain;
         $replace = null;
@@ -112,6 +112,7 @@ final class I18n {
      * @param string $defaultLanguage
      * @param string $domain
      * @param string $defaultValue
+     * @return bool true if found from cache
      * @throws Exception
      */
     public static function init(string $localePath, string $defaultLanguage, string $domain, string $defaultValue = I18n::DEFAULT_VALUE) {
@@ -122,7 +123,7 @@ final class I18n {
         I18n::$logger = new Logger('i18n');
 
         I18n::isValidLanguageTag($defaultLanguage);
-        I18n::initTable();
+        $ret = I18n::initTable();
 
         if (!isset($_SESSION['i18n-context'])) {
             if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
@@ -133,6 +134,8 @@ final class I18n {
                 self::setLanguage($defaultLanguage);
             }
         }
+
+        return $ret;
     }
 
     /**
@@ -152,13 +155,14 @@ final class I18n {
     }
 
     /**
+     * @return bool true if found from cache
      * @throws Exception
      */
     private static function initTable() {
         if (CacheFactory::instance()) {
             I18n::$localisationTable = CacheFactory::instance()->get('i18n-cache-localization-table');
             if (I18n::$localisationTable) {
-                return;
+                return true;
             }
         }
 
@@ -182,7 +186,7 @@ final class I18n {
 
                 I18n::$localisationTable[$domain][$langTag] = [
                     'domain' => $domain,
-                    'filename' => $file,
+                    'filename' => $file->getPathname(),
                     'languageTag' => $langTag,
                     'isoCode' => $isoCode,
                     'countryCode' => $countryCode,
@@ -205,6 +209,8 @@ final class I18n {
         if (CacheFactory::instance()) {
             CacheFactory::instance()->insert('i18n-cache-localization-table', I18n::$localisationTable);
         }
+
+        return false;
     }
 
     private static function setUserLanguages($languages) {

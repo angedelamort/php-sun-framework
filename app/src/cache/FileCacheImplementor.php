@@ -114,6 +114,15 @@ class FileCacheImplementor implements ICacheImplementor {
         return unserialize(file_get_contents($filename));
     }
 
+    /**
+     * @param string $key
+     * @param $value
+     * @param CacheDependency|null $dependency
+     * @param DateTime|null $absoluteExpiration
+     * @param DateInterval|null $slidingExpiration
+     * @return string
+     * @throws Exception
+     */
     private function toData(string $key, $value, ?CacheDependency $dependency, ?DateTime $absoluteExpiration, ?DateInterval $slidingExpiration) {
         if ($dependency) {
             // we need to somehow update the keys with the values of this specific cache. Seems the best place, right after adding.

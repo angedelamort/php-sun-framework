@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use sunframework\cache\CacheFactory;
 use sunframework\i18n\I18n;
 use sunframework\i18n\I18nOptions;
 
