@@ -4,6 +4,7 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use sunframework\cache\Cache;
 use sunframework\cache\CacheDependency;
+use sunframework\cache\FileCache;
 
 final class CacheTest extends TestCase {
 
@@ -12,10 +13,7 @@ final class CacheTest extends TestCase {
     private static $tempFile;
 
     public static function setUpBeforeClass() : void {
-        self::$cache = new Cache([
-            'db' => 'files',
-            'files-path' => __DIR__ . '/cache'
-        ]);
+        self::$cache = FileCache::create(__DIR__ . '/cache');
 
         self::$tempFile = __DIR__ . '/cache/foo.bar';
         file_put_contents(self::$tempFile, "Hello World!");

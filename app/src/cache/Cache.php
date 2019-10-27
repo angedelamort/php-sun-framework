@@ -14,8 +14,7 @@ use Exception;
  *
  * Remark: Support only file-based for now.
  */
-final class Cache {
-
+abstract class Cache {
     /**
      * @var $cacheImp ICacheImplementor
      */
@@ -23,25 +22,10 @@ final class Cache {
 
     /**
      * Cache constructor.
-     * @param array $options
-     *  options: {
-     *     db: {files}
-     *
-     *     files-path: string
-     *  }
-     * @param callback|null $onRemove($key, $reason)
-     * @throws Exception
+     * @param ICacheImplementor $implementor
      */
-    public function __construct(array $options, $onRemove = null) {
-        if (isset($options['db'])) {
-            switch ($options['db']) {
-                case 'files':
-                    $this->cacheImp = new FileCacheImplementor($options['files-path'], $onRemove);
-                    break;
-                default:
-                    throw new Exception("Not Supported.");
-            }
-        }
+    protected function __construct(ICacheImplementor $implementor) {
+        $this->cacheImp = $implementor;
     }
 
     public function clear() {

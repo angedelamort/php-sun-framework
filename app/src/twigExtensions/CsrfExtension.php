@@ -37,7 +37,6 @@ class CsrfExtension extends AbstractExtension  implements GlobalsInterface
         ];
     }
 
-    // TODO: add simple input with 1 function...
     public function getFunctions() {
         return [
             new TwigFunction('csrf', [$this, 'generateCsrf'], ['is_safe' => ['html']]),

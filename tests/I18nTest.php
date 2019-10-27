@@ -2,18 +2,10 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use sunframework\cache\CacheFactory;
 use sunframework\i18n\I18n;
 use sunframework\i18n\I18nOptions;
 
 final class I18nTest extends TestCase {
-    // TODO: setup - tear down...
-    // todo: test the 3 different text method.
-    // TODO: test the cache
-    // TODO: test multiple domains
-    // TODO: test inheritance.
-    // TODO: test the default.
-
     public static function setUpBeforeClass() : void {
         I18n::init(__DIR__ . '/locale', 'en-US', 'default');
     }

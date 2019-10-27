@@ -95,25 +95,6 @@ class CacheDependency {
         return false;
     }
 
-    public static function serialize(?CacheDependency $dependency) {
-        if ($dependency)
-            return ['files' => $dependency->files, 'keys' => $dependency->keys];
-        return null;
-    }
-
-    public static function deserialize($value) {
-        if ($value) {
-            $value = json_decode(json_encode($value), true); // TODO: parent should be an array as well.
-            $cd = new CacheDependency(null, null);
-            $cd->files = (array)$value['files'];
-            $cd->keys = (array)$value['keys'];
-
-            return $cd;
-        }
-
-        return null;
-    }
-
     private function initFiles(array $filenames) {
         $this->files = [];
         foreach ($filenames as $filename) {
