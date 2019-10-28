@@ -53,7 +53,7 @@ class SunAppConfig {
      * @param $callback callable|null Can overwrite the default mechanism if you don't want to use controllers.
      * @return SunAppConfig
      */
-    public function activateRoutes($directories, $callback) {
+    public function activateRoutes($directories, $callback = null) {
         $this->routeEnabled = true;
         if ($directories) {
             if (is_string($directories)) {
@@ -79,6 +79,7 @@ class SunAppConfig {
     /**
      * @param $templateLocations string|array directory where the twig templates are located
      * @param callable $onNewExtension When the app will add new extension, will call this callback.
+     * @return SunAppConfig
      */
     public function activateTwig($templateLocations, callable $onNewExtension = null) {
         $this->twigEnabled = true;
@@ -97,26 +98,31 @@ class SunAppConfig {
                 throw new InvalidArgumentException("onNewExtension");
             }
         }
+        return $this;
     }
 
     /**
      * Application will check that the CSRF token is passed when not doing a POST operation.
      * @param bool $redirectPost if true, will redirect on the GET with same route instead of failure.
      * @param callable|null $failureCallback Override with your own personal failure mechanism.
+     * @return SunAppConfig
      */
     public function activateCsrfToken(bool $redirectPost = true, callable $failureCallback = null) {
         $this->csrfEnabled = true;
         $this->csrfRedirectPost = $redirectPost;
         $this->csrfFailureCallback = $failureCallback;
+        return $this;
     }
 
     /**
      * Enable the cache and also for all subsystem that can use it.
-     * @param bool $isCacheEnabled
+     * @param string $cacheDirectory
+     * @return SunAppConfig
      */
     public function activateCache(string $cacheDirectory) {
         $this->cacheEnabled = true;
         $this->cacheDirectory = $cacheDirectory;
+        return $this;
     }
 
     /**
@@ -125,30 +131,37 @@ class SunAppConfig {
      * @param string $directory locale directory. If null, no locale will be set.
      * @param string $domain the name of the file that will be used to find the string.
      * @param string $defaultLanguage the default locale. You will need a file with this extension: en-US, fr-CA, etc
+     * @return SunAppConfig
      */
     public function activateI18n(string $directory, string $domain, string $defaultLanguage) {
         $this->i18nEnabled = true;
         $this->i18nDirectory = $directory;
         $this->i18nDomain = $domain;
         $this->i18nDefaultLanguage = $defaultLanguage;
+        return $this;
     }
 
     /**
      * @param int $lifetimeSec
+     * @return SunAppConfig
      */
     public function setCookieLifetime(int $lifetimeSec = self::DEFAULT_COOKIE_LIFETIME) {
         $this->cookieLifetime = $lifetimeSec;
+        return $this;
     }
 
     /**
      * @param bool $isDebug
+     * @return SunAppConfig
      */
     public function setDebugMode(bool $isDebug = true) {
         $this->debugEnabled = $isDebug;
+        return $this;
     }
 
     /**
      * @param IUserSessionInterface $userSessionInterface The implementation you want to use. By default the sunframework\user\UserSession will be used.
+     * @return SunAppConfig
      */
     public function activateSession(IUserSessionInterface $userSessionInterface = null) {
         $this->sessionEnabled = true;
@@ -157,6 +170,7 @@ class SunAppConfig {
         } else {
             $this->userSessionInterface = new UserSession();
         }
+        return $this;
     }
 
     /**
