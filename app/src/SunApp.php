@@ -27,7 +27,7 @@ class SunApp extends App {
     private $routables = [];
     private $whitelistableRoutes = [];
     /** @var AuthManager */
-    private $authManager;
+    private $authManager = null;
     /** @var SunAppConfig */
     private $config;
 
@@ -147,25 +147,34 @@ class SunApp extends App {
     }
 
     private function initView() {
+        if (!$this->config->isTwigEnabled())
+            return;
+
         $this->getContainer()['view'] = function ($container) {
-            $view = new \Slim\Views\Twig($this->config->getTwigTemplateLocations(), [
-                'cache' => $this->config->getCacheDirectory()
-            ]);
+            $options = [];
+            if ($this->config->isCacheEnabled()) {
+                $options['cache'] = $this->config->getCacheDirectory();
+            }
+            $view = new \Slim\Views\Twig($this->config->getTwigTemplateLocations(), $options);
 
             // NOTE: probably find a way to extract the twig extensions somewhere else. Not really nice here
             $router = $container->get('router');
             $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
             $view->addExtension(new \Slim\Views\TwigExtension($router, $uri));
 
-            if (isset($this->getContainer()['csrf'])) {
+            if ($this->config->isCsrfEnabled() && isset($this->getContainer()['csrf'])) {
                 $view->addExtension(new CsrfExtension($container->get('csrf')));
             }
 
             $view->addExtension(new SwitchTwigExtension()); //https://github.com/buzzingpixel/twig-switch
-            $view->addExtension(new I18NTwigExtension());
+            if ($this->config->isI18nEnabled()) {
+                $view->addExtension(new I18NTwigExtension());
+            }
             $view->addExtension(new LibraryExtension());
             $view->addExtension(new OperatorExtension());
-            $view->addExtension(new UserTwigExtension($this->authManager));
+            if ($this->authManager) {
+                $view->addExtension(new UserTwigExtension($this->authManager));
+            }
 
             if ($this->config->getTwigNewExtensionCallback()) {
                 call_user_func($this->config->getTwigNewExtensionCallback(), $view);

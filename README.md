@@ -311,7 +311,6 @@ controllers, it's base on the 'haydenpierce/class-finder' package.
 server-side datatables.net
 
 # TODO
-* fix the logging using monolog
+* TODO - test each components individually
 * finish the database migration and make an updater instead (git/zip/etc)
-* finish the i18n properly.
 * Make a phpunit.xml (with env variables)

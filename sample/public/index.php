@@ -10,6 +10,7 @@ $options = (new SunAppConfig())
     ->activateI18n(dirname(__DIR__) . '/locale', 'default', 'en-US')
     ->activateTwig(dirname(__DIR__) . '/templates')
     ->activateCsrfToken()
+    ->activateSession()
     ->activateRoutes('sample\controllers');
 
 $app = new SunApp($options);

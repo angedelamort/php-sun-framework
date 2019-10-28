@@ -7,21 +7,21 @@ use sunframework\user\UserSession;
 
 class SunAppConfig {
     /** @var bool */
-    private $routeEnabled;
+    private $routeEnabled = false;
     /** @var string|array|null */
     private $routeDirectories;
     /** @var callable|null */
     private $routeCallback;
     /** @var bool */
-    private $cacheEnabled;
+    private $cacheEnabled = false;
     /**@var bool */
-    private $twigEnabled;
+    private $twigEnabled = false;
     /**@var string */
-    private $cacheDirectory;
+    private $cacheDirectory = "";
     /** @var array|string|null */
     private $twigTemplateLocations;
     /** @var bool */
-    private $csrfEnabled;
+    private $csrfEnabled = false;
     /** @var bool */
     private $csrfRedirectPost;
     /** @var callable|null */
@@ -29,7 +29,7 @@ class SunAppConfig {
     /** @var callable|null */
     private $twigNewExtensionCallback;
     /** @var bool */
-    private $i18nEnabled;
+    private $i18nEnabled = false;
     /** @var string */
     private $i18nDirectory;
     /** @var string <*/
@@ -39,9 +39,9 @@ class SunAppConfig {
     /** @var int 14 days is the default. */
     private $cookieLifetime = self::DEFAULT_COOKIE_LIFETIME;
     /** @var bool */
-    private $debugEnabled;
+    private $debugEnabled = false;
     /** @var bool */
-    private $sessionEnabled;
+    private $sessionEnabled = false;
     /** @var IUserSessionInterface */
     private $userSessionInterface;
 
