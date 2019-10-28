@@ -20,7 +20,8 @@
         "erusev/parsedown": "^1.7",
         "haydenpierce/class-finder" : "^0.3",
         "ext-pdo": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-http": "*"
     },
     "autoload": {
         "psr-4": {

@@ -1,6 +1,7 @@
 <?php 
 namespace sunframework;
 
+use Exception;
 use HaydenPierce\ClassFinder\ClassFinder;
 use Monolog\Logger;
 use Slim\App;
@@ -10,8 +11,6 @@ use sunframework\route\IRoutable;
 use sunframework\route\IWhitelistable;
 use sunframework\twigExtensions\LibraryItem;
 use sunframework\user\AuthManager;
-use sunframework\user\IUserSessionInterface;
-use sunframework\user\UserSession;
 use sunframework\system\SSP;
 use sunframework\system\StringUtil;
 use sunframework\twigExtensions\CsrfExtension;
@@ -29,37 +28,25 @@ class SunApp extends App {
     private $whitelistableRoutes = [];
     /** @var AuthManager */
     private $authManager;
+    /** @var SunAppConfig */
+    private $config;
 
-    // TODO: make an object
-    public $config = [
-        'routes.controllers' => null,   // string|array<string>: Override with namespace(s) containing controllers (Must inherit from IRoutable).
-        'routes.custom' => null,        // callback: If you just want to make a simple function for registering your routes.
-        'view.templates' => '.',        // string|array<string>: directory where the twig templates are located.
-        'view.cache' => false,          // bool: set to true to enable the cache
-        'view.csrf' => false,           // enable CSRF token.
-        'view.csrf.redirect' => true,   // If there is a CSRF error, try to redirect to the GET instead of displaying an error.
-        'view.csrf.failure' => null,    // callback: If there is a CSRF error and you want to have a custom page.
-        'view.addExtension' => null,    // callback($twig): If you want to register new extension
-        'session.cookie_lifetime' => 1209600,   // int: 14 days is the default.
-        'i18n.directory' => null,       // string: locale directory. If null, no locale will be set.
-        'i18n.default' => 'en-us',      // string: the default locale. You will need a file with this extension
-        'i18n.domain' => 'default',     // string: the name of the file that will be used to find the string.
-        'auth.userSession' => null,     // IUserSessionInterface: The implementation you want to use. By default the UserSession will be used.
-        'debug' => false                // Set to true if you want to debug Slim
-    ];
-
-    public function __construct($config, $container = [])
+    /**
+     * SunApp constructor.
+     * @param SunAppConfig $config
+     * @param array $container
+     * @throws Exception
+     */
+    public function __construct(SunAppConfig $config, $container = [])
     {
         $this->logger = new Logger("sun-app");
-        if (is_array($config)) {
-            $this->config = array_merge($this->config, $config);
-        }
+        $this->config = $config;
 
 //        $this->initDatabase();
 
         $this->initSession();
 
-        if ($this->config['i18n.directory']) {
+        if ($this->config->isI18nEnabled()) {
             $this->initI18n();
         }
 
@@ -70,7 +57,7 @@ class SunApp extends App {
             ]
         ]));
 
-        if ($this->config['view.csrf']) {
+        if ($this->config->isCsrfEnabled()) {
             $this->initCsrf();
         }
         $this->initAuthManager();
@@ -79,7 +66,7 @@ class SunApp extends App {
     }
 
     public function isDebug() {
-        return $this->config['debug'];
+        return $this->config->isDebugEnabled();
     }
 
     public function addLibrary(LibraryItem $item) {
@@ -93,10 +80,11 @@ class SunApp extends App {
         return $this->authManager;
     }
 
+    /**
+     * @throws Exception
+     */
     private function initI18n() {
-        $lang = $this->config['i18n.default'];
-
-        I18n::init($this->config['i18n.directory'], $lang, $this->config['i18n.domain']);
+        I18n::init($this->config->getI18nDirectory(), $this->config->getI18nDefaultLanguage(), $this->config->getI18nDomain());
     }
 
     private function initDatabase() {
@@ -107,16 +95,14 @@ class SunApp extends App {
 
     private function initSession() {
         session_start([
-            'cookie_lifetime' => $this->config['session.cookie_lifetime'],
+            'cookie_lifetime' => $this->config->getCookieLifetime(),
             //'read_and_close'  => true, -> TODO : make read-only pages : would need to modify the initialisation flow. Maybe create a session class.
         ]);
     }
 
     private function initAuthManager() {
-        if ($this->config['auth.userSession'] && is_subclass_of($this->config['auth.userSession'], IUserSessionInterface::class)) {
-            $this->authManager = new AuthManager($this->config['auth.userSession']);
-        } else {
-            $this->authManager = new AuthManager(new UserSession());
+        if ($this->config->isSessionEnabled()) {
+            $this->authManager = new AuthManager($this->config->getUserSessionInterface());
         }
     }
 
@@ -135,13 +121,13 @@ class SunApp extends App {
                 }
 
                 // if a bad post, just try to reload the page.
-                if ($this->config['view.csrf.redirect'] && $request->getMethod() == 'POST') {
+                if ($this->config->isCsrfRedirectPost() && $request->getMethod() == 'POST') {
                     $this->logger->info("it's a post, try to go to the GET with same address");
                     return $response->withStatus(302)->withHeader('Location', $request->getUri());
                 }
 
                 // if other type of error,
-                $cb = $this->config['view.csrf.failure'];
+                $cb = $this->config->getCsrfFailureCallback();
                 if ($cb && is_callable($cb)) {
                     return call_user_func($cb, $request, $response);
                 }
@@ -162,8 +148,8 @@ class SunApp extends App {
 
     private function initView() {
         $this->getContainer()['view'] = function ($container) {
-            $view = new \Slim\Views\Twig($this->config['view.templates'], [
-                'cache' => $this->config['view.cache']
+            $view = new \Slim\Views\Twig($this->config->getTwigTemplateLocations(), [
+                'cache' => $this->config->getCacheDirectory()
             ]);
 
             // NOTE: probably find a way to extract the twig extensions somewhere else. Not really nice here
@@ -181,8 +167,8 @@ class SunApp extends App {
             $view->addExtension(new OperatorExtension());
             $view->addExtension(new UserTwigExtension($this->authManager));
 
-            if ($this->config['view.addExtension']) {
-                call_user_func($this->config['view.addExtension'], $view);
+            if ($this->config->getTwigNewExtensionCallback()) {
+                call_user_func($this->config->getTwigNewExtensionCallback(), $view);
             }
 
             return $view;
@@ -190,8 +176,8 @@ class SunApp extends App {
     }
 
     private function registerRoutes() {
-        if ($this->config['routes.controllers'] != null) {
-            $classes = $this->get_all_implementors($this->config['routes.controllers']);
+        if ($this->config->getRouteDirectories() != null) {
+            $classes = $this->get_all_implementors($this->config->getRouteDirectories());
 
             foreach($classes as $klass) {
                 $instance = null;
@@ -208,8 +194,8 @@ class SunApp extends App {
             }
         }
 
-        if (is_callable($this->config['routes.custom'])) {
-            call_user_func($this->config['routes.custom'], $this);
+        if (is_callable($this->config->getRouteCallback())) {
+            call_user_func($this->config->getRouteCallback(), $this);
         }
     }
 
@@ -231,7 +217,7 @@ class SunApp extends App {
                 }
             }
             return $classes;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             die("could not load the controllers\n$e");
         }
     }
