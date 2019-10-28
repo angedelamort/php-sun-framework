@@ -309,8 +309,3 @@ controllers, it's base on the 'haydenpierce/class-finder' package.
 
 ### SSP
 server-side datatables.net
-
-# TODO
-* TODO - test each components individually
-* finish the database migration and make an updater instead (git/zip/etc)
-* Make a phpunit.xml (with env variables)
