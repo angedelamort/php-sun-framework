@@ -10,6 +10,7 @@ another simple PHP framework.
 * Rendering State Machine - custom
 * Cache - custom
 * server-side tables integration - DataTables.net (remove?)
+* DebugBar - DebugBar
 
 ## Installing
 
@@ -309,3 +310,34 @@ controllers, it's base on the 'haydenpierce/class-finder' package.
 
 ### SSP
 server-side datatables.net
+
+
+### Debugging using a debug bar
+In the project, I've added the https://github.com/maximebf/php-debugbar. Since it uses twig 
+1.0, I had to do some gymnastics in order to get it working. Also, because of the way
+it register to monolog, I had to do some kind of wrapper. So, if you want to use it,
+here's the steps. 
+
+1. When initializing your app, add to the option the debug bar:
+    ````php
+    $options = new SunAppConfig()->activateDebugBar(__DIR__ . '/generated', '/generated')->(...)
+    $app = new SunApp($options);
+    ```` 
+2.  In your Twig template, you will need to add 2 statements:
+    ````html
+    <!-- HEADER -->
+    {{ debugBarHeader() }}
+    
+    <!-- END OF BODY -->
+    {{ debugBarFooter() }}
+    ````
+3. Normally, it works from here, but if you want your new messages to be catch by the
+debugBar, you will need to use the wrapper ``SunLogger``:
+    ````php
+    // Normal monolog stuff
+    $logger = new SunLogger('name');
+    $logger->info('Hello here!');
+    
+    // To appear in the 'Message' section
+    $logger->message('Should appear in the message section');
+    ````
