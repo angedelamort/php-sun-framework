@@ -44,12 +44,6 @@ class SunAppConfig {
     private $sessionEnabled = false;
     /** @var IUserSessionInterface */
     private $userSessionInterface;
-    /** @var bool */
-    private $isDebugBarEnabled = false;
-    /** @var string */
-    private $debugBarSourceDir;
-    /** @var string */
-    private $debugBarBaseUrl;
 
     private const DEFAULT_COOKIE_LIFETIME = 1209600;
 
@@ -329,43 +323,5 @@ class SunAppConfig {
     public function getCacheDirectory(): string
     {
         return $this->cacheDirectory;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDebugBarEnabled(): bool
-    {
-        return $this->isDebugBarEnabled;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDebugBarBaseUrl(): string
-    {
-        return $this->debugBarBaseUrl;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDebugBarSourceDir(): string
-    {
-        return $this->debugBarSourceDir;
-    }
-
-    /**
-     * @param string $debugBarSourceDir
-     * @param string $debugBarBaseUrl
-     * @return SunAppConfig
-     * @note You will need a compatible jQuery version
-     */
-    public function activateDebugBar(string $debugBarSourceDir, string $debugBarBaseUrl)
-    {
-        $this->isDebugBarEnabled = true;
-        $this->debugBarSourceDir = $debugBarSourceDir;
-        $this->debugBarBaseUrl = $debugBarBaseUrl;
-        return $this;
     }
 }

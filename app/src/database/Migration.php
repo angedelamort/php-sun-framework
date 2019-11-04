@@ -5,8 +5,8 @@ namespace sunframework\database;
 use Exception;
 use FilesystemIterator;
 use InvalidArgumentException;
+use Monolog\Logger;
 use PDO;
-use sunframework\system\SunLogger;
 
 // NOTE: in development
 class Migration {
@@ -22,10 +22,9 @@ class Migration {
      * @param PDO $pdo
      * @param string $migrationDir
      * @param string $tableName
-     * @throws Exception
      */
     public function __construct(PDO $pdo, string $migrationDir, string $tableName = self::TABLE_NAME) {
-        $this->logger = new SunLogger('migration');
+        $this->logger = new Logger('migration');
         $this->tableName = $tableName;
         $this->pdo = $pdo;
         $this->migrationDir = $migrationDir;

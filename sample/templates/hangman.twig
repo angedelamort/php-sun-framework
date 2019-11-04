@@ -1,6 +1,12 @@
-{% extends "shared/defaultLayout.twig" %}
-
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>state</title>
+    {{ css('semantic-ui') }}
+    {{ css('css/test.css') }}
+</head>
+<body>
+<div class="ui container">
     <div class="ui segment">
         <h1>Hangman</h1>
         <h2>WORD:
@@ -15,13 +21,10 @@
                 <label>Guess a Letter</label>
                 <input type="text" name="letter" maxlength="1" placeholder="type a letter" tabindex="0" autofocus>
             </div>
-            <input class="ui button green" type="submit" name="action" value="Try">
+            <input class="ui button green" type="submit" value="Try">
         </form>
-        <div class="padding-top-1">
-            <form class="ui form" action="state" method="POST">
-                {{ csrf() }}
-                <input class="ui tiny button red" type="submit" name="action" value="Reset">
-            </form>
-        </div>
     </div>
-{% endblock %}
+</div>
+{{ js('jquery', 'semantic-ui') }}
+</body>
+</html>

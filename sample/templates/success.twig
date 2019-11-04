@@ -1,6 +1,12 @@
-{% extends "shared/defaultLayout.twig" %}
-
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>state</title>
+    {{ css('semantic-ui') }}
+    {{ css('css/test.css') }}
+</head>
+<body>
+<div class="ui container">
     <div class="ui segment">
         <h1>Hangman</h1>
         <h2>You won!</h2>
@@ -10,4 +16,7 @@
             <input class="ui button green" type="submit" value="New Game">
         </form>
     </div>
-{% endblock %}
+</div>
+{{ js('jquery', 'semantic-ui') }}
+</body>
+</html>

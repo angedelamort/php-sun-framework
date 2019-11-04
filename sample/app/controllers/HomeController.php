@@ -3,7 +3,6 @@
 namespace sample\controllers;
 
 
-use sample\states\InitState;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use sunframework\route\IRoutable;
@@ -12,6 +11,7 @@ use sunframework\SunApp;
 class HomeController implements IRoutable {
     public function registerRoute(SunApp $app) {
         $app->get('/', function(Request $request, Response $response, array $args) {
+            unset($_SESSION['state-game']);
             return $this->view->render($response, 'home.twig');
         });
 

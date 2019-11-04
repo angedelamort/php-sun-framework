@@ -11,7 +11,6 @@ $options = (new SunAppConfig())
     ->activateTwig(dirname(__DIR__) . '/templates')
     ->activateCsrfToken()
     ->activateSession()
-    ->activateDebugBar(__DIR__ . '/generated', '/generated')
     ->activateRoutes('sample\controllers');
 
 $app = new SunApp($options);

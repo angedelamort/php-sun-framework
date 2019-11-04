@@ -4,7 +4,7 @@ namespace sunframework\stateMachine;
 
 
 use Exception;
-use sunframework\system\SunLogger;
+use Monolog\Logger;
 
 /**
  * Class StateMachine
@@ -29,7 +29,7 @@ use sunframework\system\SunLogger;
  */
 class StateMachine {
 
-    /** @var SunLogger */
+    /** @var Logger */
     private $logger;
     /** @var BaseState */
     private $currentState;
@@ -43,7 +43,7 @@ class StateMachine {
      * @throws Exception
      */
     public function __construct($initialState, string $statesNamespace) {
-        $this->logger = new SunLogger('state-machine');
+        $this->logger = new Logger('state-machine');
         $this->statesNamespace = $statesNamespace;
 
         if (is_string($initialState)) {

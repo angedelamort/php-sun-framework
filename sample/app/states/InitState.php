@@ -3,7 +3,6 @@
 namespace sample\states;
 
 
-use sample\controllers\StateController;
 use sunframework\stateMachine\BaseState;
 use sunframework\stateMachine\StateMachineContext;
 use sunframework\stateMachine\Transition;
@@ -52,11 +51,6 @@ class InitState extends BaseState {
         $_SESSION[self::SESSION_KEY] = $state;
     }
 
-    public static function reset() {
-        unset($_SESSION[self::SESSION_KEY]);
-        unset($_SESSION[StateController::SESSION_KEY]);
-    }
-
     private static function isNewLetter($letter) {
         $state = $_SESSION[self::SESSION_KEY];
         for ($i = 0; $i < count($state['word']); $i++) {
@@ -79,12 +73,6 @@ class InitState extends BaseState {
 
     private function initStateMachine(): void
     {
-        $resetTransition = new Transition(InitState::name(), [$this, 'reset'], 'completed');
-        $resetTransition->addCondition(function (StateMachineContext $context) {
-            return $context->getRequest()->getParsedBodyParam('action') === 'Reset';
-        });
-        $this->addTransition($resetTransition);
-
         $finalTransition = new Transition(FinalState::name(), [$this, 'setLetter'], 'completed');
         $finalTransition->addCondition(function (StateMachineContext $context) {
             return self::isCompleted($context->getRequest()->getParsedBodyParam('letter'));

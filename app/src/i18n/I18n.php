@@ -3,10 +3,10 @@
 namespace sunframework\i18n;
 
 use Exception;
+use Monolog\Logger;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use sunframework\cache\Cache;
-use sunframework\system\SunLogger;
 
 /**
  * Class I18n
@@ -24,7 +24,7 @@ final class I18n {
     private static $defaultLanguage;
     /** @var array readonly */
     private static $localisationTable;
-    /** @var SunLogger readonly */
+    /** @var Logger readonly */
     private static $logger;
     /** @var string readonly */
     private static $defaultValue;
@@ -120,7 +120,7 @@ final class I18n {
         I18n::$localePath = $localePath;
         I18n::$defaultLanguage = $defaultLanguage;
         I18n::$domain = $domain;
-        I18n::$logger = new SunLogger('i18n');
+        I18n::$logger = new Logger('i18n');
 
         I18n::isValidLanguageTag($defaultLanguage);
         $ret = I18n::initTable();
