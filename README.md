@@ -341,3 +341,12 @@ debugBar, you will need to use the wrapper ``SunLogger``:
     // To appear in the 'Message' section
     $logger->message('Should appear in the message section');
     ````
+    
+**Note:** Since I didn't want people to start copying files around for debug purposes,
+I generate the files in the directory given as parameter when initializing the debugBar.
+But if you start playing with it (changing some configs), you will probably need to delete the generated files
+manually before doing a new render.
+
+Also, **jQuery is disabled**. You will need toi include it manually. I didn't want to
+have multiple version of jQuery at the same time. Since it's for debug purposes, I think
+it's a small annoyance.
