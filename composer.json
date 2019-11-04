@@ -18,7 +18,8 @@
         "slim/twig-view": "^2.4",
         "ramsey/uuid": "^3.8",
         "erusev/parsedown": "^1.7",
-        "haydenpierce/class-finder" : "^0.3"
+        "haydenpierce/class-finder" : "^0.3",
+        "maximebf/debugbar": "^1.15"
     },
     "autoload": {
         "psr-4": {

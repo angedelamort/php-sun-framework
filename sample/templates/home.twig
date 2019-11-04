@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ i18n('appName') }}</title>
-    {{ css('semantic-ui') }}
-    {{ css('css/test.css') }}
-</head>
-<body>
-<div class="ui container">
+{% extends "shared/defaultLayout.twig" %}
+
+{% block content %}
     <div class="ui segment">
         <h1>{{ i18n('appName') }}</h1>
         {% if user %}
-            <p>Hello {{ user.name }}.</p>
-            <a href="logout">log-out</a>
+            <h3>Hello {{ user.name }}!</h3>
         {% else %}
-            <p>You are currently not logged-in.</p>
-            <p>Please <a href="login">log-in</a></p>
+            <p>You are currently not <a href="login">logged-in</a>.</p>
         {% endif %}
     </div>
     <div class="ui segment">
         <div>Play <a href="/state">Hangman</a> (state machine sample)</div>
     </div>
-</div>
-{{ js('jquery', 'semantic-ui') }}
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{{ i18n('appName') }}{% endblock %}</title>
+    {% block css_top %}
+        {{ css('semantic-ui') }}
+        {{ css('css/test.css') }}
+    {% endblock %}
+    {{ debugBarHeader() }}
+</head>
+<body>
+<div class="ui menu">
+    <div class="ui container">
+        <a href="/" class="header item">
+            Sample Project
+        </a>
+        <div class="ui simple dropdown item">
+            Games <i class="dropdown icon"></i>
+            <div class="menu">
+                <a class="item" href="/state">Hangman</a>
+            </div>
+        </div>
+        <div class="right item">
+            {% if user %}
+                <a class="ui green button" href="/logout">Log Out</a>
+            {% else %}
+                <a class="ui green button" href="/login">Log In</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="ui container">
+    {% block content %}{% endblock %}
+</div>
+{% block js_bot %}
+    {{ js('jquery', 'semantic-ui') }}
+{% endblock %}
+    {{ debugBarFooter() }}
+</body>
+</html>

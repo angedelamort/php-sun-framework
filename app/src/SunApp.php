@@ -1,15 +1,18 @@
 <?php 
 namespace sunframework;
 
+use DebugBar\StandardDebugBar;
 use Exception;
 use HaydenPierce\ClassFinder\ClassFinder;
-use Monolog\Logger;
 use Slim\App;
 use sunframework\i18n\I18n;
 use sunframework\i18n\I18NTwigExtension;
 use sunframework\route\IRoutable;
 use sunframework\route\IWhitelistable;
+use sunframework\system\SunLogger;
+use sunframework\twigExtensions\DebugBarTwigExtension;
 use sunframework\twigExtensions\LibraryItem;
+use sunframework\twigExtensions\SunTwigCollector;
 use sunframework\user\AuthManager;
 use sunframework\system\SSP;
 use sunframework\system\StringUtil;
@@ -20,10 +23,13 @@ use sunframework\twigExtensions\SwitchTwigExtension;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use sunframework\user\UserTwigExtension;
+use Twig\Extension\ProfilerExtension;
+use Twig\Profiler\Profile;
 
 
 class SunApp extends App {
     private $logger;
+    private $debugBar = null;
     private $routables = [];
     private $whitelistableRoutes = [];
     /** @var AuthManager */
@@ -39,8 +45,21 @@ class SunApp extends App {
      */
     public function __construct(SunAppConfig $config, $container = [])
     {
-        $this->logger = new Logger("sun-app");
         $this->config = $config;
+        if ($config->isDebugBarEnabled()) {
+            $this->debugBar = new StandardDebugBar();
+            SunLogger::init($this->debugBar);
+        }
+
+        $this->logger = new SunLogger("sun-app");
+        $this->logger->message("hello world!");
+
+        if ($config->isDebugBarEnabled()) {
+            $this->getContainer()['Logger'] = function () {
+                $logger = new SunLogger('slim');
+                return $logger;
+            };
+        }
 
 //        $this->initDatabase();
 
@@ -157,25 +176,32 @@ class SunApp extends App {
             }
             $view = new \Slim\Views\Twig($this->config->getTwigTemplateLocations(), $options);
 
+            if ($this->config->isDebugBarEnabled()) {
+                $profile = new Profile();
+                $view->addExtension(new ProfilerExtension($profile));
+                $this->debugBar->addCollector(new SunTwigCollector($profile));
+            }
+
             // NOTE: probably find a way to extract the twig extensions somewhere else. Not really nice here
             $router = $container->get('router');
             $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
             $view->addExtension(new \Slim\Views\TwigExtension($router, $uri));
+            $view->addExtension(new SwitchTwigExtension()); //https://github.com/buzzingpixel/twig-switch
+            $view->addExtension(new LibraryExtension());
+            $view->addExtension(new OperatorExtension());
 
             if ($this->config->isCsrfEnabled() && isset($this->getContainer()['csrf'])) {
                 $view->addExtension(new CsrfExtension($container->get('csrf')));
             }
-
-            $view->addExtension(new SwitchTwigExtension()); //https://github.com/buzzingpixel/twig-switch
             if ($this->config->isI18nEnabled()) {
                 $view->addExtension(new I18NTwigExtension());
             }
-            $view->addExtension(new LibraryExtension());
-            $view->addExtension(new OperatorExtension());
             if ($this->authManager) {
                 $view->addExtension(new UserTwigExtension($this->authManager));
             }
-
+            if ($this->config->isDebugBarEnabled()) {
+                $view->addExtension(new DebugBarTwigExtension($this->debugBar, $this->config->getDebugBarSourceDir(), $this->config->getDebugBarBaseUrl()));
+            }
             if ($this->config->getTwigNewExtensionCallback()) {
                 call_user_func($this->config->getTwigNewExtensionCallback(), $view);
             }
