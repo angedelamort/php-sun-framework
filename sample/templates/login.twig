@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ i18n('appName') }}</title>
-    {{ css('semantic-ui') }}
-    {{ css('css/test.css') }}
-</head>
-<body>
-<div class="ui container">
+{% extends "shared/defaultLayout.twig" %}
+
+{% block content %}
     <div class="ui segment">
         <h1>Login</h1>
         <form class="ui form" action="login" method="POST">
@@ -19,7 +13,4 @@
             <input class="ui button" type="submit">
         </form>
     </div>
-</div>
-{{ js('jquery', 'semantic-ui') }}
-</body>
-</html>
+{% endblock %}

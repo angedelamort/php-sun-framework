@@ -2,8 +2,7 @@
 
 namespace sunframework\stateMachine;
 
-
-use Monolog\Logger;
+use sunframework\system\SunLogger;
 
 abstract class BaseState {
 
@@ -12,7 +11,7 @@ abstract class BaseState {
     private $logger;
 
     public function __construct() {
-        $this->logger = new Logger('state-machine');
+        $this->logger = new SunLogger('state-machine');
     }
 
     /**
