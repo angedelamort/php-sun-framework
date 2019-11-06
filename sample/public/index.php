@@ -12,7 +12,7 @@ $options = (new SunAppConfig())
     ->activateCsrfToken()
     ->activateSession()
     ->activateDebugBar(__DIR__ . '/generated', '/generated')
-    ->activateRoutes('sample\controllers');
+    ->activateRoutes(['sample\controllers' => dirname(__DIR__) . '/app/controllers']);
 
 $app = new SunApp($options);
 

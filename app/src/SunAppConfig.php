@@ -8,7 +8,7 @@ use sunframework\user\UserSession;
 class SunAppConfig {
     /** @var bool */
     private $routeEnabled = false;
-    /** @var string|array|null */
+    /** @var array|null */
     private $routeDirectories;
     /** @var callable|null */
     private $routeCallback;
@@ -55,21 +55,14 @@ class SunAppConfig {
 
     /**
      * Enable the route mechanism.
-     * @param $directories string|array|null Controller(s) Must inherit from IRoutable
+     * A route is defined by [namespace => source]
+     * @param $directories array|null Controller(s) Must inherit from IRoutable.
      * @param $callback callable|null Can overwrite the default mechanism if you don't want to use controllers.
      * @return SunAppConfig
      */
-    public function activateRoutes($directories, $callback = null) {
+    public function activateRoutes(array $directories, $callback = null) {
         $this->routeEnabled = true;
-        if ($directories) {
-            if (is_string($directories)) {
-                $this->routeDirectories = [$directories];
-            } else if (is_array($directories)) {
-                $this->routeDirectories = [$directories];
-            } else {
-                throw new InvalidArgumentException("directories");
-            }
-        }
+        $this->routeDirectories = $directories;
 
         if ($callback){
             if (is_callable($callback)) {
