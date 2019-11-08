@@ -55,7 +55,7 @@ class SunAppConfig {
 
     /**
      * Enable the route mechanism.
-     * A route is defined by [namespace => source]
+     * A route is defined by [namespace => source] - TODO: could give the list manually.
      * @param $directories array|null Controller(s) Must inherit from IRoutable.
      * @param $callback callable|null Can overwrite the default mechanism if you don't want to use controllers.
      * @return SunAppConfig

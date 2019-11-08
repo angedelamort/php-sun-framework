@@ -92,7 +92,7 @@ class SunApp extends App {
         parent::__construct(array_merge_recursive($container, [
             'settings' => [
                 'determineRouteBeforeAppMiddleware' => true,
-                'displayErrorDetails' => true
+                'displayErrorDetails' => true // TODO: set it to true only if debug.
             ]
         ]));
 
@@ -113,7 +113,6 @@ class SunApp extends App {
             $sw = (new Stopwatch('run'))->start();
             return parent::run($silent);
         } finally {
-            // NOTE: will never be called because it the render will end the measuring. But just for the sake of symmetry.
             $sw->stop();
         }
     }
