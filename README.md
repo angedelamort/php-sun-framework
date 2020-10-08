@@ -159,6 +159,9 @@ the rest of the section for more information.
 
 #### Functions
 ##### js & css
+
+TODO: LibraryExtension::addLibrary(...)
+
 This function is used to include registered libraries or just a normal file. 
 The goal is to simplify the templates. 
 

@@ -55,7 +55,7 @@ class LibraryItem {
         if (is_array($value)) {
             $this->$key = array_merge($this->$key, $value);
         } else if (is_string($value)) {
-            $this[$key][] = $value;
+            $this->$key[] = $value;
         }
         return $this;
     }
