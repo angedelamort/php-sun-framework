@@ -1,7 +1,9 @@
 # PHP Sun Framework
-another simple PHP framework.
+
+Another simple PHP framework.
 
 ## Features
+
 * routing - Slim
 * templating - Twig
 * i18n (internationalization) - custom
